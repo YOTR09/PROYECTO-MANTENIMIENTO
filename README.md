@@ -72,3 +72,11 @@ python main.py
 ```bash
 python -m unittest discover tests
 ```
+
+---
+
+## 📚 Documentación Completa
+
+Para una explicación técnica profunda y manuales detallados, consulta la carpeta [`docs/`](docs/):
+- **[Arquitectura y Diseño Técnico (`docs/ARQUITECTURA.md`)](docs/ARQUITECTURA.md):** Explicación de las 3 capas, justificación de SQLite, modelo entidad-relación y algoritmo de semaforización.
+- **[Guía de Instalación y Manual de Usuario (`docs/GUIA_INSTALACION_Y_USO.md`)](docs/GUIA_INSTALACION_Y_USO.md):** Manual paso a paso por módulos, cómo respaldar la base de datos y preguntas frecuentes.
