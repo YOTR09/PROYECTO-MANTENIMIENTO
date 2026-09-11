@@ -1,4 +1,5 @@
 from src.repositories.vehiculo_repository import VehiculoRepository
+from src.models.enums import EstadoVehiculo
 
 class VehiculoService:
     @staticmethod
@@ -11,6 +12,7 @@ class VehiculoService:
 
     @staticmethod
     def registrar_vehiculo(id_socio, numero_unidad, placa, marca_modelo, ano=None, kilometraje_actual=0, status="Activo"):
+    def registrar_vehiculo(id_socio, numero_unidad, placa, marca_modelo, ano=None, kilometraje_actual=0, status=EstadoVehiculo.ACTIVO.value):
         if not id_socio:
             raise ValueError("Debe seleccionar un socio propietario.")
         if not numero_unidad or not numero_unidad.strip():

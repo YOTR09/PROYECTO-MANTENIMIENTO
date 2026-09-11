@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 import customtkinter as ctk
 from src.services.vehiculo_service import VehiculoService
 from src.services.socio_service import SocioService
+from src.models.enums import EstadoVehiculo
 
 class VehiculosView(ctk.CTkFrame):
     def __init__(self, parent):
@@ -29,6 +30,7 @@ class VehiculosView(ctk.CTkFrame):
         self.filtro_status = ctk.CTkComboBox(
             top_frame,
             values=["Todos", "Activo", "En Taller", "Inactivo"],
+            values=["Todos", EstadoVehiculo.ACTIVO.value, EstadoVehiculo.EN_TALLER.value, EstadoVehiculo.INACTIVO.value],
             width=130,
             command=lambda v: self.cargar_datos(),
             state="readonly"
@@ -112,6 +114,8 @@ class VehiculosView(ctk.CTkFrame):
         ctk.CTkLabel(self.form_card, text="Estado Operativo:", anchor="w").pack(fill="x", padx=20, pady=(3, 0))
         self.var_status = ctk.StringVar(value="Activo")
         self.combo_status = ctk.CTkComboBox(self.form_card, values=["Activo", "En Taller", "Inactivo"], variable=self.var_status, state="readonly")
+        self.var_status = ctk.StringVar(value=EstadoVehiculo.ACTIVO.value)
+        self.combo_status = ctk.CTkComboBox(self.form_card, values=[EstadoVehiculo.ACTIVO.value, EstadoVehiculo.EN_TALLER.value, EstadoVehiculo.INACTIVO.value], variable=self.var_status, state="readonly")
         self.combo_status.pack(fill="x", padx=20, pady=(0, 12))
 
         # Botones
@@ -317,6 +321,7 @@ class VehiculosView(ctk.CTkFrame):
         self.var_ano.set("")
         self.var_km.set("0")
         self.var_status.set("Activo")
+        self.var_status.set(EstadoVehiculo.ACTIVO.value)
         if self.tree.selection():
             self.tree.selection_remove(self.tree.selection())
 

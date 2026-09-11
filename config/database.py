@@ -5,6 +5,11 @@ from contextlib import contextmanager
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "mantenimiento.db")
+
+is_testing = os.environ.get("TESTING") == "1"
+if is_testing:
+    DB_PATH = os.path.join(DATA_DIR, "test_mantenimiento.db")
+
 SCHEMA_PATH = os.path.join(BASE_DIR, "database", "schema.sql")
 SEEDS_PATH = os.path.join(BASE_DIR, "database", "seeds.sql")
 

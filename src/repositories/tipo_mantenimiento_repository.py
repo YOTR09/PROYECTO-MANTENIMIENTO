@@ -19,6 +19,20 @@ class TipoMantenimientoRepository:
         rows = cursor.fetchall()
         conn.close()
         return [dict(row) for row in rows]
+        with get_db_cursor() as cursor:
+            if search_term:
+                query = """
+                    SELECT id_tipo, nombre, descripcion, intervalo_km, intervalo_dias
+                    FROM tipo_mantenimiento
+                    WHERE nombre LIKE ? OR descripcion LIKE ?
+                    ORDER BY nombre ASC
+                """
+                wildcard = f"%{search_term.strip()}%"
+                cursor.execute(query, (wildcard, wildcard))
+            else:
+                cursor.execute("SELECT id_tipo, nombre, descripcion, intervalo_km, intervalo_dias FROM tipo_mantenimiento ORDER BY id_tipo ASC")
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]
 
     @staticmethod
     def get_by_id(id_tipo):
@@ -28,6 +42,10 @@ class TipoMantenimientoRepository:
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
+        with get_db_cursor() as cursor:
+            cursor.execute("SELECT * FROM tipo_mantenimiento WHERE id_tipo = ?", (id_tipo,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
 
     @staticmethod
     def create(nombre, descripcion, intervalo_km, intervalo_dias):
