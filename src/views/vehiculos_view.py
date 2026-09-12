@@ -317,7 +317,6 @@ class VehiculosView(ctk.CTkFrame):
         self.var_marca.set("")
         self.var_ano.set("")
         self.var_km.set("0")
-        self.var_status.set("Activo")
         self.var_status.set(EstadoVehiculo.ACTIVO.value)
         if self.tree.selection():
             self.tree.selection_remove(self.tree.selection())
