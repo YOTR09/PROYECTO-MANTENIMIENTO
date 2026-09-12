@@ -29,7 +29,6 @@ class VehiculosView(ctk.CTkFrame):
         # Filtros a la derecha
         self.filtro_status = ctk.CTkComboBox(
             top_frame,
-            values=["Todos", "Activo", "En Taller", "Inactivo"],
             values=["Todos", EstadoVehiculo.ACTIVO.value, EstadoVehiculo.EN_TALLER.value, EstadoVehiculo.INACTIVO.value],
             width=130,
             command=lambda v: self.cargar_datos(),

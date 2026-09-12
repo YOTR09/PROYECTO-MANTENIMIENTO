@@ -11,7 +11,6 @@ class VehiculoService:
         return VehiculoRepository.get_by_id(id_vehiculo)
 
     @staticmethod
-    def registrar_vehiculo(id_socio, numero_unidad, placa, marca_modelo, ano=None, kilometraje_actual=0, status="Activo"):
     def registrar_vehiculo(id_socio, numero_unidad, placa, marca_modelo, ano=None, kilometraje_actual=0, status=EstadoVehiculo.ACTIVO.value):
         if not id_socio:
             raise ValueError("Debe seleccionar un socio propietario.")
