@@ -1,24 +1,8 @@
-from config.database import get_db_connection, get_db_cursor
+from config.database import get_db_cursor
 
 class SocioRepository:
     @staticmethod
     def get_all(search_term=None):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        if search_term:
-            query = """
-                SELECT id_socio, cedula, nombre_completo, telefono, estado 
-                FROM socio 
-                WHERE cedula LIKE ? OR nombre_completo LIKE ? OR telefono LIKE ?
-                ORDER BY nombre_completo ASC
-            """
-            wildcard = f"%{search_term.strip()}%"
-            cursor.execute(query, (wildcard, wildcard, wildcard))
-        else:
-            cursor.execute("SELECT id_socio, cedula, nombre_completo, telefono, estado FROM socio ORDER BY nombre_completo ASC")
-        rows = cursor.fetchall()
-        conn.close()
-        return [dict(row) for row in rows]
         with get_db_cursor() as cursor:
             if search_term:
                 query = """
@@ -36,12 +20,6 @@ class SocioRepository:
 
     @staticmethod
     def get_by_id(id_socio):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM socio WHERE id_socio = ?", (id_socio,))
-        row = cursor.fetchone()
-        conn.close()
-        return dict(row) if row else None
         with get_db_cursor() as cursor:
             cursor.execute("SELECT * FROM socio WHERE id_socio = ?", (id_socio,))
             row = cursor.fetchone()
@@ -49,12 +27,6 @@ class SocioRepository:
 
     @staticmethod
     def get_by_cedula(cedula):
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM socio WHERE cedula = ?", (cedula.strip(),))
-        row = cursor.fetchone()
-        conn.close()
-        return dict(row) if row else None
         with get_db_cursor() as cursor:
             cursor.execute("SELECT * FROM socio WHERE cedula = ?", (cedula.strip(),))
             row = cursor.fetchone()

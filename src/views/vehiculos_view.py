@@ -111,8 +111,6 @@ class VehiculosView(ctk.CTkFrame):
 
         # Estado Operativo
         ctk.CTkLabel(self.form_card, text="Estado Operativo:", anchor="w").pack(fill="x", padx=20, pady=(3, 0))
-        self.var_status = ctk.StringVar(value="Activo")
-        self.combo_status = ctk.CTkComboBox(self.form_card, values=["Activo", "En Taller", "Inactivo"], variable=self.var_status, state="readonly")
         self.var_status = ctk.StringVar(value=EstadoVehiculo.ACTIVO.value)
         self.combo_status = ctk.CTkComboBox(self.form_card, values=[EstadoVehiculo.ACTIVO.value, EstadoVehiculo.EN_TALLER.value, EstadoVehiculo.INACTIVO.value], variable=self.var_status, state="readonly")
         self.combo_status.pack(fill="x", padx=20, pady=(0, 12))
