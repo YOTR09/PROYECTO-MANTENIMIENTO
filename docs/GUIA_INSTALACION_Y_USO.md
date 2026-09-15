@@ -1,4 +1,5 @@
 # 📖 Guía de Instalación y Manual de Usuario
+
 ## Sistema de Control de Mantenimiento Preventivo — Brisas del Palmar
 
 ---
@@ -6,6 +7,7 @@
 ## 📋 Requisitos Previos
 
 Antes de instalar y ejecutar la aplicación, asegúrate de contar con:
+
 - **Python 3.10 o superior** instalado en el sistema.
 - Soporte para **Tkinter** habilitado en Python.
   - En Linux (Ubuntu/Debian): `sudo apt-get install python3-tk`
@@ -17,7 +19,9 @@ Antes de instalar y ejecutar la aplicación, asegúrate de contar con:
 ## ⚙️ Instalación Paso a Paso
 
 ### 1. Clonar o descargar el repositorio
+
 Navega a la carpeta del proyecto en tu terminal:
+
 ```bash
 cd PROYECTO-MANTENIMIENTO
 ```
@@ -25,22 +29,27 @@ cd PROYECTO-MANTENIMIENTO
 ### 2. Crear y activar el Entorno Virtual (Recomendado)
 
 - **En Linux / macOS:**
+
   ```bash
   python3 -m venv venv
   source venv/bin/activate
   ```
 
 - **En Windows:**
+
   ```cmd
   python -m venv venv
   venv\Scripts\activate
   ```
 
 ### 3. Instalar las dependencias
+
 Con el entorno virtual activado, ejecuta:
+
 ```bash
 pip install -r requirements.txt
 ```
+
 *(Instalará `customtkinter>=6.0.0` y sus utilidades complementarias).*
 
 ---
@@ -52,7 +61,9 @@ Para iniciar la aplicación de escritorio, ejecuta:
 ```bash
 python main.py
 ```
+
 o directamente con el intérprete del entorno virtual:
+
 ```bash
 venv/bin/python main.py
 ```
@@ -80,7 +91,9 @@ La ventana principal cuenta con una **barra lateral izquierda (Sidebar)** que te
 ---
 
 ### Módulo 1: Gestión de Socios y Propietarios (`👥 Socios`)
+
 En las empresas de transporte, las unidades pertenecen a socios o afiliados:
+
 1. Dirígete a la sección **"👥 Socios y Propietarios"**.
 2. **Registrar un nuevo socio:**
    - Llena la Cédula (ej. `V-14567890`), Nombre Completo, Teléfono y Estado.
@@ -93,7 +106,9 @@ En las empresas de transporte, las unidades pertenecen a socios o afiliados:
 ---
 
 ### Módulo 2: Gestión de Flota y Unidades (`🚐 Flota y Unidades`)
+
 Permite registrar y controlar cada autobús, microbús o camioneta:
+
 1. Haz clic en **"🚐 Flota y Unidades"**.
 2. **Registrar un Vehículo:**
    - Selecciona el **Socio Propietario** en el menú desplegable.
@@ -111,7 +126,9 @@ Permite registrar y controlar cada autobús, microbús o camioneta:
 ---
 
 ### Módulo 3: Catálogo de Mantenimientos (`📋 Catálogo Rutinas`)
+
 Aquí se definen las tareas de mantenimiento preventivo y sus frecuencias:
+
 1. Haz clic en **"📋 Catálogo Rutinas"**.
 2. Verás precargadas las **10 rutinas recomendadas** para transporte público:
    - *Cambio de Aceite y Filtro de Motor* (cada 5.000 km / 60 días)
@@ -131,7 +148,9 @@ Aquí se definen las tareas de mantenimiento preventivo y sus frecuencias:
 ---
 
 ### Módulo 4: Control Preventivo y Semaforización (`🛠️ Control Preventivo`)
+
 Es el panel central de control de la empresa:
+
 1. **Programar una rutina a una unidad:**
    - Pulsa **"➕ Programar Rutina a Unidad"**.
    - Selecciona la unidad y la rutina que deseas monitorear.
@@ -157,6 +176,7 @@ Es el panel central de control de la empresa:
 ---
 
 ### Módulo 5: Dashboard y Métricas (`📊 Dashboard`)
+
 - Muestra tarjetas resumen con el total de unidades activas, en taller, y el conteo de mantenimientos vencidos, por vencer y al día.
 - Incluye la tabla de **Alertas Críticas y Próximos Vencimientos**, mostrando únicamente las unidades que requieren atención urgente.
 - El botón **"Ir a Control Preventivo ➔"** te traslada directamente para gestionar el servicio.
@@ -164,6 +184,7 @@ Es el panel central de control de la empresa:
 ---
 
 ### Módulo 6: Bitácora Histórica (`📜 Bitácora Histórica`)
+
 - Permite auditar todos los trabajos realizados en la historia de la empresa.
 - Muestra fecha, unidad, placa, costo, taller y los repuestos que se instalaron.
 - Permite buscar por placa, unidad o taller para auditorías de gastos mecánicos.
@@ -171,6 +192,7 @@ Es el panel central de control de la empresa:
 ---
 
 ### Módulo 7: Cambio de Modo Visual (Oscuro / Claro)
+
 - En la parte inferior de la barra lateral izquierda encontrarás el selector de tema:
   - **Dark:** Ideal para trabajo nocturno o reducir fatiga visual.
   - **Light:** Modo claro para oficinas muy iluminadas o impresiones de pantalla.
@@ -184,9 +206,11 @@ Respaldar toda la información de Brisas del Palmar es sumamente sencillo:
 
 1. Cierra la aplicación.
 2. Copia el archivo ubicado en:
+
    ```text
    PROYECTO-MANTENIMIENTO/data/mantenimiento.db
    ```
+
 3. Guárdalo en una memoria USB, disco externo o almacenamiento en la nube (Google Drive, Dropbox, OneDrive).
 4. Para restaurar en caso de formateo o cambio de computadora, simplemente pega el archivo `mantenimiento.db` dentro de la carpeta `data/`.
 
@@ -201,6 +225,7 @@ python -m unittest discover tests
 ```
 
 Salida esperada:
+
 ```text
 ..
 ----------------------------------------------------------------------
@@ -208,4 +233,3 @@ Ran 2 tests in 0.050s
 
 OK
 ```
-

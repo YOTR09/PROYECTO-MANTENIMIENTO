@@ -1,4 +1,5 @@
 # 📚 Centro de Documentación
+
 ## Sistema de Control de Mantenimiento Preventivo — Brisas del Palmar
 
 Bienvenido al centro de documentación técnica y operativa del proyecto. Aquí encontrarás toda la información necesaria para comprender la arquitectura del sistema, desplegarlo y utilizarlo eficientemente.
@@ -7,14 +8,14 @@ Bienvenido al centro de documentación técnica y operativa del proyecto. Aquí 
 
 ## 📑 Índice de Documentos
 
-1. ### [🏛️ Arquitectura y Estructura del Sistema (ARQUITECTURA.md)](ARQUITECTURA.md)
+1. [🏛️ Arquitectura y Estructura del Sistema (ARQUITECTURA.md)](ARQUITECTURA.md)
    - **Patrón de Arquitectura en 3 Capas:** Presentación (CustomTkinter), Lógica de Negocio (Services) y Acceso a Datos (Repositories).
    - **Justificación de SQLite:** Portabilidad, cero configuración y rendimiento local.
    - **Modelo de Datos y Diagrama ER:** Entidades `socio`, `vehiculo`, `tipo_mantenimiento`, `mantenimiento_programado` e `historial_mantenimiento`.
    - **Motor de Semaforización Preventiva:** Algoritmo y fórmulas para los estados 🟢 *Al Día*, 🟡 *Por Vencer* y 🔴 *Vencido*.
    - **Estructura detallada del proyecto:** Explicación de cada archivo y directorio.
 
-2. ### [📖 Guía de Instalación y Manual de Usuario (GUIA_INSTALACION_Y_USO.md)](GUIA_INSTALACION_Y_USO.md)
+2. [📖 Guía de Instalación y Manual de Usuario (GUIA_INSTALACION_Y_USO.md)](GUIA_INSTALACION_Y_USO.md)
    - **Requisitos del Sistema:** Versiones compatibles de Python y soporte de Tkinter.
    - **Instalación paso a paso:** Creación de entorno virtual e instalación de dependencias con `pip`.
    - **Manual de Usuario por Módulos:**
@@ -29,6 +30,4 @@ Bienvenido al centro de documentación técnica y operativa del proyecto. Aquí 
    - **Pruebas Automatizadas:** Cómo ejecutar los tests unitarios.
 
 ---
-
 Para volver a la raíz del proyecto, consulta el [`README.md`](../README.md) principal.
-

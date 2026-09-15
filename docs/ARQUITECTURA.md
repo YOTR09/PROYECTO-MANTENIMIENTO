@@ -1,4 +1,5 @@
 # 🏛️ Arquitectura y Estructura del Sistema
+
 ## Sistema de Control de Mantenimiento Preventivo — Brisas del Palmar
 
 ---
@@ -43,7 +44,8 @@ graph TD
     V_Hist --> S_Mant
 ```
 
-### Principios de Separación:
+### Principios de Separación
+
 1. **La Interfaz Visual (`views/`) NUNCA ejecuta sentencias SQL:** Su única función es renderizar elementos en pantalla, capturar eventos de usuario y delegar las acciones a los *Services*.
 2. **Los Servicios (`services/`) concentran las reglas del negocio:** Aquí residen las validaciones de entrada, el cálculo matemático de fechas y kilometrajes, las condiciones de semaforización y la lógica de reprogramación automática.
 3. **Los Repositorios (`repositories/`) aíslan el motor de datos:** Encapsulan todas las consultas SQL (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) y transacciones.
@@ -54,6 +56,7 @@ graph TD
 ## 2. Motor de Base de Datos (SQLite)
 
 ### ¿Por qué SQLite y no un servidor de base de datos externo?
+
 - **Cero Configuración:** No requiere instalar ni mantener un servicio o demonio corriendo en segundo plano (evita los fallos clásicos de desconexión `Connection Refused` o error 2003 de MySQL).
 - **Portabilidad Absoluta:** Toda la información de la empresa vive en un único archivo físico (`data/mantenimiento.db`). Respaldar el sistema completo se reduce a copiar este archivo.
 - **Rendimiento Excepcional en Escritorio:** Al interactuar directamente mediante llamadas a la API de C de SQLite en el sistema de archivos local, se elimina la latencia de protocolos de red TCP/IP.
@@ -121,7 +124,8 @@ erDiagram
     }
 ```
 
-### Reglas de Integridad:
+### Reglas de Integridad
+
 - **Protección de Socios:** La base de datos y la capa de servicios impiden la eliminación de un socio si tiene vehículos asociados (`ON DELETE RESTRICT`).
 - **Eliminación en Cascada de Vehículos:** Al eliminar una unidad, se eliminan sus programaciones activas asociadas (`ON DELETE CASCADE`), pero su bitácora histórica puede mantenerse auditada.
 - **Unicidad:** La cédula del socio, la placa del vehículo y el número interno de unidad son claves únicas (`UNIQUE`).
@@ -131,10 +135,11 @@ erDiagram
 ## 4. Motor de Mantenimiento Preventivo y Semaforización
 
 El corazón del sistema evalúa simultáneamente dos variables de desgaste:
+
 1. **Desgaste por Uso Físico (Kilómetros recorridos):** $\Delta_{\text{km}} = \text{km\_próximo} - \text{km\_actual}$
 2. **Degradación por Tiempo (Días transcurridos):** $\Delta_{\text{días}} = \text{fecha\_próxima} - \text{fecha\_hoy}$
 
-### Matriz de Estados de Alerta:
+### Matriz de Estados de Alerta
 
 | Estado | Indicador Visual | Condición Matemática | Acción Recomendada |
 | :--- | :---: | :--- | :--- |
@@ -142,8 +147,10 @@ El corazón del sistema evalúa simultáneamente dos variables de desgaste:
 | **Por Vencer** | 🟡 Amarillo | $1 \le \Delta_{\text{km}} \le 500$  ó  $1 \le \Delta_{\text{días}} \le 10$ | **Planificación:** Restan menos de 500 km o 10 días; preparar repuestos y agendar turno en taller. |
 | **Al Día** | 🟢 Verde | $\Delta_{\text{km}} > 500$  y  $\Delta_{\text{días}} > 10$ | **Óptimo:** Unidad apta para operar en ruta regular. |
 
-### Ciclo de Ejecución de Mantenimiento:
+### Ciclo de Ejecución de Mantenimiento
+
 Cuando el usuario registra un mantenimiento ejecutado en [`ProgramacionMantView`](file:///home/yheremyt/PROYECTO-MANTENIMIENTO/src/views/programacion_mant_view.py):
+
 1. Se crea un registro inmutable en `historial_mantenimiento` con fecha, taller, costo y detalles.
 2. Si el odómetro ingresado es superior al odómetro registrado del vehículo, `vehiculo.kilometraje_actual` se actualiza automáticamente.
 3. Se recalcula el próximo vencimiento:
@@ -195,4 +202,3 @@ PROYECTO-MANTENIMIENTO/
 ├── .gitignore                      # Exclusión de entornos virtuales y cachés
 └── README.md                       # Resumen rápido del repositorio
 ```
-
