@@ -57,18 +57,22 @@ PROYECTO-MANTENIMIENTO/
 ## 💻 Instrucciones de Instalación y Uso
 
 ### 1. Activar el entorno virtual e instalar dependencias
+
 ```bash
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ### 2. Iniciar la Aplicación
+
 ```bash
 python main.py
 ```
+
 *(Al iniciar por primera vez, el sistema creará automáticamente la base de datos `data/mantenimiento.db` y cargará el catálogo de mantenimientos iniciales).*
 
 ### 3. Ejecutar las Pruebas Unitarias
+
 ```bash
 python -m unittest discover tests
 ```
@@ -78,5 +82,6 @@ python -m unittest discover tests
 ## 📚 Documentación Completa
 
 Para una explicación técnica profunda y manuales detallados, consulta la carpeta [`docs/`](docs/):
+
 - **[Arquitectura y Diseño Técnico (`docs/ARQUITECTURA.md`)](docs/ARQUITECTURA.md):** Explicación de las 3 capas, justificación de SQLite, modelo entidad-relación y algoritmo de semaforización.
 - **[Guía de Instalación y Manual de Usuario (`docs/GUIA_INSTALACION_Y_USO.md`)](docs/GUIA_INSTALACION_Y_USO.md):** Manual paso a paso por módulos, cómo respaldar la base de datos y preguntas frecuentes.
