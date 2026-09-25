@@ -93,8 +93,8 @@ class DashboardView(ctk.CTkFrame):
             btn_ir_mant = ctk.CTkButton(
                 header_alertas,
                 text="Ir a Control Preventivo ➔",
-                fg_color="#10B981",
-                hover_color="#059669",
+                fg_color="#0C8A60",
+                hover_color="#045E41",
                 command=lambda: self.on_navigate("preventivo")
             )
             btn_ir_mant.pack(side="right")

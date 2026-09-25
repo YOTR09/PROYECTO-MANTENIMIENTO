@@ -116,19 +116,19 @@ class VehiculosView(ctk.CTkFrame):
         self.combo_status.pack(fill="x", padx=20, pady=(0, 12))
 
         # Botones
-        self.btn_guardar = ctk.CTkButton(self.form_card, text="➕ Guardar Unidad", fg_color="#10B981", hover_color="#059669", command=self.guardar)
+        self.btn_guardar = ctk.CTkButton(self.form_card, text="➕ Guardar Unidad", fg_color="#269225", hover_color="#059605", command=self.guardar)
         self.btn_guardar.pack(fill="x", padx=20, pady=4)
 
-        self.btn_actualizar = ctk.CTkButton(self.form_card, text="✏️ Actualizar Unidad", fg_color="#3B82F6", hover_color="#2563EB", command=self.actualizar)
+        self.btn_actualizar = ctk.CTkButton(self.form_card, text="✏️ Actualizar Unidad", fg_color="#22447A", hover_color="#132C63", command=self.actualizar)
         self.btn_actualizar.pack(fill="x", padx=20, pady=4)
 
         self.btn_odometro = ctk.CTkButton(self.form_card, text="⚡ Actualizar Solo Odómetro", fg_color="#F59E0B", hover_color="#D97706", command=self.actualizar_solo_odometro)
         self.btn_odometro.pack(fill="x", padx=20, pady=4)
 
-        self.btn_limpiar = ctk.CTkButton(self.form_card, text="🧹 Limpiar Campos", fg_color="#6B7280", hover_color="#4B5563", command=self.limpiar_formulario)
+        self.btn_limpiar = ctk.CTkButton(self.form_card, text="🧹 Limpiar Campos", fg_color="#42464E", hover_color="#383F49", command=self.limpiar_formulario)
         self.btn_limpiar.pack(fill="x", padx=20, pady=4)
 
-        self.btn_eliminar = ctk.CTkButton(self.form_card, text="🗑️ Eliminar Unidad", fg_color="#EF4444", hover_color="#DC2626", command=self.eliminar)
+        self.btn_eliminar = ctk.CTkButton(self.form_card, text="🗑️ Eliminar Unidad", fg_color="#AA3030", hover_color="#921919", command=self.eliminar)
         self.btn_eliminar.pack(fill="x", padx=20, pady=(4, 10))
 
         # ---------------- TABLA DE DATOS ----------------
