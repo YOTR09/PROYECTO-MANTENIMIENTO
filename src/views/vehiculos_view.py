@@ -135,6 +135,10 @@ class VehiculosView(ctk.CTkFrame):
         table_container = ctk.CTkFrame(content_frame, corner_radius=10)
         table_container.pack(side="right", fill="both", expand=True, pady=5)
 
+        style = ttk.Style() 
+        style.configure("Treeview", font=("Segoe UI", 14), rowheight=31)
+        style.configure("Treeview.Heading", font=("Segoe UI", 12, "bold"))
+
         columnas = ("id", "unidad", "placa", "marca", "ano", "km", "status", "socio")
         self.tree = ttk.Treeview(table_container, columns=columnas, show="headings", selectmode="browse")
 
