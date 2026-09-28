@@ -5,6 +5,18 @@ from datetime import date
 from src.services.mantenimiento_service import MantenimientoService
 from src.services.vehiculo_service import VehiculoService
 from src.services.tipo_mantenimiento_service import TipoMantenimientoService
+from src.views.theme import (
+    BTN_SUCCESS_COLOR,
+    BTN_SUCCESS_HOVER,
+    BTN_PRIMARY_COLOR,
+    BTN_PRIMARY_HOVER,
+    BTN_NEUTRAL_COLOR,
+    BTN_NEUTRAL_HOVER,
+    BTN_DANGER_COLOR,
+    BTN_DANGER_HOVER,
+    TEXT_ACCENT_BLUE,
+    configurar_tags_semaforo,
+)
 
 class ProgramacionMantView(ctk.CTkFrame):
     def __init__(self, parent):
@@ -51,8 +63,8 @@ class ProgramacionMantView(ctk.CTkFrame):
         btn_asignar = ctk.CTkButton(
             action_bar,
             text="➕ Programar Rutina a Unidad",
-            fg_color="#10B981",
-            hover_color="#059669",
+            fg_color=BTN_SUCCESS_COLOR,
+            hover_color=BTN_SUCCESS_HOVER,
             command=self.abrir_modal_programar
         )
         btn_asignar.pack(side="left", padx=(0, 10))
@@ -60,8 +72,8 @@ class ProgramacionMantView(ctk.CTkFrame):
         btn_ejecutar = ctk.CTkButton(
             action_bar,
             text="✅ Registrar Mantenimiento Realizado",
-            fg_color="#3B82F6",
-            hover_color="#2563EB",
+            fg_color=BTN_PRIMARY_COLOR,
+            hover_color=BTN_PRIMARY_HOVER,
             command=self.abrir_modal_realizado
         )
         btn_ejecutar.pack(side="left", padx=(0, 10))
@@ -69,8 +81,8 @@ class ProgramacionMantView(ctk.CTkFrame):
         btn_eliminar = ctk.CTkButton(
             action_bar,
             text="🗑️ Quitar Programación",
-            fg_color="#EF4444",
-            hover_color="#DC2626",
+            fg_color=BTN_DANGER_COLOR,
+            hover_color=BTN_DANGER_HOVER,
             command=self.eliminar_programacion
         )
         btn_eliminar.pack(side="left", padx=(0, 10))
@@ -78,8 +90,8 @@ class ProgramacionMantView(ctk.CTkFrame):
         btn_refrescar = ctk.CTkButton(
             action_bar,
             text="🔄 Refrescar",
-            fg_color="#6B7280",
-            hover_color="#4B5563",
+            fg_color=BTN_NEUTRAL_COLOR,
+            hover_color=BTN_NEUTRAL_HOVER,
             width=100,
             command=self.cargar_datos
         )
@@ -116,9 +128,7 @@ class ProgramacionMantView(ctk.CTkFrame):
         self.tree.column("detalle", width=240, anchor="w")
 
         # Configuración de tags de color para las filas
-        self.tree.tag_configure("vencido", background="#FEE2E2", foreground="#991B1B")       # Rojo suave
-        self.tree.tag_configure("por_vencer", background="#FEF3C7", foreground="#92400E")    # Amarillo suave
-        self.tree.tag_configure("al_dia", background="#D1FAE5", foreground="#065F46")        # Verde suave
+        configurar_tags_semaforo(self.tree)
 
         # Scrollbars
         scroll_y = ttk.Scrollbar(table_container, orient="vertical", command=self.tree.yview)
@@ -257,7 +267,7 @@ class ProgramacionMantView(ctk.CTkFrame):
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
-        ctk.CTkButton(modal, text="Guardar Programación", fg_color="#10B981", hover_color="#059669", command=guardar_prog).pack(fill="x", padx=30, pady=10)
+        ctk.CTkButton(modal, text="Guardar Programación", fg_color=BTN_SUCCESS_COLOR, hover_color=BTN_SUCCESS_HOVER, command=guardar_prog).pack(fill="x", padx=30, pady=10)
 
     def abrir_modal_realizado(self):
         """Abre ventana modal para registrar la ejecución de un mantenimiento"""
@@ -296,7 +306,7 @@ class ProgramacionMantView(ctk.CTkFrame):
             modal,
             text=f"Unidad {unidad} ({placa}) - {rutina}",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color="#3B82F6"
+            text_color=TEXT_ACCENT_BLUE
         ).pack(pady=(0, 15))
 
         # Fecha y Odómetro de la intervención
@@ -360,8 +370,8 @@ class ProgramacionMantView(ctk.CTkFrame):
         ctk.CTkButton(
             modal,
             text="Confirmar Mantenimiento Realizado",
-            fg_color="#10B981",
-            hover_color="#059669",
+            fg_color=BTN_SUCCESS_COLOR,
+            hover_color=BTN_SUCCESS_HOVER,
             command=confirmar_ejecucion
         ).pack(fill="x", padx=30, pady=10)
 
@@ -378,4 +388,3 @@ class ProgramacionMantView(ctk.CTkFrame):
                 self.cargar_datos()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
-

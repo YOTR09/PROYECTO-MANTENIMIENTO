@@ -6,6 +6,14 @@ from src.views.socios_view import SociosView
 from src.views.programacion_mant_view import ProgramacionMantView
 from src.views.tipos_mant_view import TiposMantView
 from src.views.historial_mant_view import HistorialMantView
+from src.views.theme import (
+    NAV_ACTIVE_COLOR,
+    NAV_ACTIVE_COLOR_DARK,
+    TEXT_MUTED,
+    SIDEBAR_WIDTH,
+    BTN_NAV_HEIGHT,
+    configurar_estilos_treeview,
+)
 
 class MainWindow(ctk.CTk):
     def __init__(self):
@@ -18,6 +26,7 @@ class MainWindow(ctk.CTk):
         # Configuración de tema visual
         ctk.set_appearance_mode("Dark")
         ctk.set_default_color_theme("blue")
+        configurar_estilos_treeview()
 
         self.vistas = {}
         self.botones_nav = {}
@@ -40,7 +49,7 @@ class MainWindow(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
 
         # ---------------- BARRA LATERAL (SIDEBAR) ----------------
-        self.sidebar = ctk.CTkFrame(self, width=240, corner_radius=0)
+        self.sidebar = ctk.CTkFrame(self, width=SIDEBAR_WIDTH, corner_radius=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_rowconfigure(8, weight=1) # Empuja selector de tema al fondo
 
@@ -56,7 +65,7 @@ class MainWindow(ctk.CTk):
             self.sidebar,
             text="Transporte y Mantenimiento",
             font=ctk.CTkFont(size=12),
-            text_color="#9CA3AF"
+            text_color=TEXT_MUTED
         )
         lbl_sub.grid(row=1, column=0, padx=20, pady=(0, 20), sticky="w")
 
@@ -74,7 +83,7 @@ class MainWindow(ctk.CTk):
             btn = ctk.CTkButton(
                 self.sidebar,
                 text=label,
-                height=42,
+                height=BTN_NAV_HEIGHT,
                 corner_radius=8,
                 fg_color="transparent",
                 text_color=("gray10", "gray90"),
@@ -127,7 +136,7 @@ class MainWindow(ctk.CTk):
         # Estilo del botón activo
         for k, btn in self.botones_nav.items():
             if k == key:
-                btn.configure(fg_color=("#3B82F6", "#1D4ED8"), text_color="white")
+                btn.configure(fg_color=(NAV_ACTIVE_COLOR, NAV_ACTIVE_COLOR_DARK), text_color="white")
             else:
                 btn.configure(fg_color="transparent", text_color=("gray10", "gray90"))
 
@@ -141,4 +150,3 @@ class MainWindow(ctk.CTk):
 
     def cambiar_tema(self, nuevo_tema):
         ctk.set_appearance_mode(nuevo_tema)
-

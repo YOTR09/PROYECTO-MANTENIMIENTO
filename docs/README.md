@@ -10,6 +10,7 @@ Bienvenido al centro de documentación técnica y operativa del proyecto. Aquí 
 
 1. [🏛️ Arquitectura y Estructura del Sistema (ARQUITECTURA.md)](ARQUITECTURA.md)
    - **Patrón de Arquitectura en 3 Capas:** Presentación (CustomTkinter), Lógica de Negocio (Services) y Acceso a Datos (Repositories).
+   - **Modelos y Estilos Centralizados:** Enumeraciones de estado (`models/enums.py`) y paleta visual estándar (`views/theme.py`).
    - **Justificación de SQLite:** Portabilidad, cero configuración y rendimiento local.
    - **Modelo de Datos y Diagrama ER:** Entidades `socio`, `vehiculo`, `tipo_mantenimiento`, `mantenimiento_programado` e `historial_mantenimiento`.
    - **Motor de Semaforización Preventiva:** Algoritmo y fórmulas para los estados 🟢 *Al Día*, 🟡 *Por Vencer* y 🔴 *Vencido*.
