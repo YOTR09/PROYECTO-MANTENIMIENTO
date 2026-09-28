@@ -2,6 +2,16 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import customtkinter as ctk
 from src.services.socio_service import SocioService
+from src.views.theme import (
+    BTN_SUCCESS_COLOR,
+    BTN_SUCCESS_HOVER,
+    BTN_PRIMARY_COLOR,
+    BTN_PRIMARY_HOVER,
+    BTN_NEUTRAL_COLOR,
+    BTN_NEUTRAL_HOVER,
+    BTN_DANGER_COLOR,
+    BTN_DANGER_HOVER,
+)
 
 class SociosView(ctk.CTkFrame):
     def __init__(self, parent):
@@ -80,16 +90,16 @@ class SociosView(ctk.CTkFrame):
         self.combo_estado.pack(fill="x", padx=20, pady=(0, 15))
 
         # Botones de Acción
-        self.btn_guardar = ctk.CTkButton(self.form_card, text="➕ Guardar Socio", fg_color="#269225", hover_color="#059605", command=self.guardar)
+        self.btn_guardar = ctk.CTkButton(self.form_card, text="➕ Guardar Socio", fg_color=BTN_SUCCESS_COLOR, hover_color=BTN_SUCCESS_HOVER, command=self.guardar)
         self.btn_guardar.pack(fill="x", padx=20, pady=5)
 
-        self.btn_actualizar = ctk.CTkButton(self.form_card, text="✏️ Actualizar", fg_color="#22447A", hover_color="#132C63", command=self.actualizar)
+        self.btn_actualizar = ctk.CTkButton(self.form_card, text="✏️ Actualizar", fg_color=BTN_PRIMARY_COLOR, hover_color=BTN_PRIMARY_HOVER, command=self.actualizar)
         self.btn_actualizar.pack(fill="x", padx=20, pady=5)
 
-        self.btn_limpiar = ctk.CTkButton(self.form_card, text="🧹 Limpiar Campos", fg_color="#42464E", hover_color="#383F49", command=self.limpiar_formulario)
+        self.btn_limpiar = ctk.CTkButton(self.form_card, text="🧹 Limpiar Campos", fg_color=BTN_NEUTRAL_COLOR, hover_color=BTN_NEUTRAL_HOVER, command=self.limpiar_formulario)
         self.btn_limpiar.pack(fill="x", padx=20, pady=5)
 
-        self.btn_eliminar = ctk.CTkButton(self.form_card, text="🗑️ Eliminar", fg_color="#AA3030", hover_color="#921919", command=self.eliminar)
+        self.btn_eliminar = ctk.CTkButton(self.form_card, text="🗑️ Eliminar", fg_color=BTN_DANGER_COLOR, hover_color=BTN_DANGER_HOVER, command=self.eliminar)
         self.btn_eliminar.pack(fill="x", padx=20, pady=(5, 15))
 
         # ---------------- TABLA DE DATOS ----------------
@@ -203,4 +213,3 @@ class SociosView(ctk.CTkFrame):
         self.var_estado.set("Activo")
         if self.tree.selection():
             self.tree.selection_remove(self.tree.selection())
-

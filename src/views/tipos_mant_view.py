@@ -2,6 +2,16 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import customtkinter as ctk
 from src.services.tipo_mantenimiento_service import TipoMantenimientoService
+from src.views.theme import (
+    BTN_SUCCESS_COLOR,
+    BTN_SUCCESS_HOVER,
+    BTN_PRIMARY_COLOR,
+    BTN_PRIMARY_HOVER,
+    BTN_NEUTRAL_COLOR,
+    BTN_NEUTRAL_HOVER,
+    BTN_DANGER_COLOR,
+    BTN_DANGER_HOVER,
+)
 
 class TiposMantView(ctk.CTkFrame):
     def __init__(self, parent):
@@ -77,16 +87,16 @@ class TiposMantView(ctk.CTkFrame):
         self.text_descripcion.pack(fill="x", padx=20, pady=(0, 15))
 
         # Botones
-        self.btn_guardar = ctk.CTkButton(self.form_card, text="➕ Guardar Rutina", fg_color="#10B981", hover_color="#059669", command=self.guardar)
+        self.btn_guardar = ctk.CTkButton(self.form_card, text="➕ Guardar Rutina", fg_color=BTN_SUCCESS_COLOR, hover_color=BTN_SUCCESS_HOVER, command=self.guardar)
         self.btn_guardar.pack(fill="x", padx=20, pady=5)
 
-        self.btn_actualizar = ctk.CTkButton(self.form_card, text="✏️ Actualizar Rutina", fg_color="#3B82F6", hover_color="#2563EB", command=self.actualizar)
+        self.btn_actualizar = ctk.CTkButton(self.form_card, text="✏️ Actualizar Rutina", fg_color=BTN_PRIMARY_COLOR, hover_color=BTN_PRIMARY_HOVER, command=self.actualizar)
         self.btn_actualizar.pack(fill="x", padx=20, pady=5)
 
-        self.btn_limpiar = ctk.CTkButton(self.form_card, text="🧹 Limpiar Campos", fg_color="#6B7280", hover_color="#4B5563", command=self.limpiar_formulario)
+        self.btn_limpiar = ctk.CTkButton(self.form_card, text="🧹 Limpiar Campos", fg_color=BTN_NEUTRAL_COLOR, hover_color=BTN_NEUTRAL_HOVER, command=self.limpiar_formulario)
         self.btn_limpiar.pack(fill="x", padx=20, pady=5)
 
-        self.btn_eliminar = ctk.CTkButton(self.form_card, text="🗑️ Eliminar Rutina", fg_color="#EF4444", hover_color="#DC2626", command=self.eliminar)
+        self.btn_eliminar = ctk.CTkButton(self.form_card, text="🗑️ Eliminar Rutina", fg_color=BTN_DANGER_COLOR, hover_color=BTN_DANGER_HOVER, command=self.eliminar)
         self.btn_eliminar.pack(fill="x", padx=20, pady=(5, 15))
 
         # ---------------- TABLA DE DATOS ----------------
@@ -208,4 +218,3 @@ class TiposMantView(ctk.CTkFrame):
         self.text_descripcion.delete("1.0", tk.END)
         if self.tree.selection():
             self.tree.selection_remove(self.tree.selection())
-

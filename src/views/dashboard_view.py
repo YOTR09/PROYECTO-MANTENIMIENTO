@@ -2,6 +2,18 @@ import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
 from src.services.mantenimiento_service import MantenimientoService
+from src.views.theme import (
+    KPI_INFO_COLOR,
+    KPI_INFO_HOVER,
+    KPI_DANGER_COLOR,
+    KPI_WARNING_COLOR,
+    KPI_SUCCESS_COLOR,
+    BTN_ACCENT_COLOR,
+    BTN_ACCENT_HOVER,
+    TEXT_MUTED,
+    TEXT_SECONDARY,
+    configurar_tags_semaforo,
+)
 
 class DashboardView(ctk.CTkFrame):
     def __init__(self, parent, on_navigate=None):
@@ -25,8 +37,8 @@ class DashboardView(ctk.CTkFrame):
         btn_refrescar = ctk.CTkButton(
             top_frame,
             text="🔄 Actualizar Panel",
-            fg_color="#3B82F6",
-            hover_color="#2563EB",
+            fg_color=KPI_INFO_COLOR,
+            hover_color=KPI_INFO_HOVER,
             width=140,
             command=self.actualizar_dashboard
         )
@@ -42,7 +54,7 @@ class DashboardView(ctk.CTkFrame):
             titulo="UNIDADES ACTIVAS",
             valor="0",
             subtitulo="0 unidades en total",
-            color_borde="#3B82F6"
+            color_borde=KPI_INFO_COLOR
         )
         self.card_unidades.pack(side="left", fill="both", expand=True, padx=(0, 10))
 
@@ -52,7 +64,7 @@ class DashboardView(ctk.CTkFrame):
             titulo="MANTENIMIENTOS VENCIDOS",
             valor="0",
             subtitulo="Requieren atención urgente",
-            color_borde="#EF4444"
+            color_borde=KPI_DANGER_COLOR
         )
         self.card_vencidos.pack(side="left", fill="both", expand=True, padx=5)
 
@@ -62,7 +74,7 @@ class DashboardView(ctk.CTkFrame):
             titulo="PRÓXIMOS POR VENCER",
             valor="0",
             subtitulo="Próximos 500 km o 10 días",
-            color_borde="#F59E0B"
+            color_borde=KPI_WARNING_COLOR
         )
         self.card_por_vencer.pack(side="left", fill="both", expand=True, padx=5)
 
@@ -72,7 +84,7 @@ class DashboardView(ctk.CTkFrame):
             titulo="AL DÍA / ÓPTIMOS",
             valor="0",
             subtitulo="Dentro de rango seguro",
-            color_borde="#10B981"
+            color_borde=KPI_SUCCESS_COLOR
         )
         self.card_al_dia.pack(side="left", fill="both", expand=True, padx=(10, 0))
 
@@ -93,8 +105,8 @@ class DashboardView(ctk.CTkFrame):
             btn_ir_mant = ctk.CTkButton(
                 header_alertas,
                 text="Ir a Control Preventivo ➔",
-                fg_color="#0C8A60",
-                hover_color="#045E41",
+                fg_color=BTN_ACCENT_COLOR,
+                hover_color=BTN_ACCENT_HOVER,
                 command=lambda: self.on_navigate("preventivo")
             )
             btn_ir_mant.pack(side="right")
@@ -119,8 +131,7 @@ class DashboardView(ctk.CTkFrame):
         self.tree.column("prox_fecha", width=100, anchor="center")
         self.tree.column("alerta", width=280, anchor="w")
 
-        self.tree.tag_configure("vencido", background="#FEE2E2", foreground="#991B1B")
-        self.tree.tag_configure("por_vencer", background="#FEF3C7", foreground="#92400E")
+        configurar_tags_semaforo(self.tree)
 
         scroll_y = ttk.Scrollbar(alertas_container, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scroll_y.set)
@@ -130,13 +141,13 @@ class DashboardView(ctk.CTkFrame):
     def _crear_kpi_card(self, parent, titulo, valor, subtitulo, color_borde):
         card = ctk.CTkFrame(parent, corner_radius=10, border_width=2, border_color=color_borde)
         
-        lbl_tit = ctk.CTkLabel(card, text=titulo, font=ctk.CTkFont(size=12, weight="bold"), text_color="#9CA3AF")
+        lbl_tit = ctk.CTkLabel(card, text=titulo, font=ctk.CTkFont(size=12, weight="bold"), text_color=TEXT_MUTED)
         lbl_tit.pack(pady=(12, 2))
 
         lbl_val = ctk.CTkLabel(card, text=valor, font=ctk.CTkFont(size=28, weight="bold"))
         lbl_val.pack(pady=(0, 2))
 
-        lbl_sub = ctk.CTkLabel(card, text=subtitulo, font=ctk.CTkFont(size=11), text_color="#6B7280")
+        lbl_sub = ctk.CTkLabel(card, text=subtitulo, font=ctk.CTkFont(size=11), text_color=TEXT_SECONDARY)
         lbl_sub.pack(pady=(0, 12))
 
         # Almacenamos referencias para actualizar luego
@@ -174,4 +185,3 @@ class DashboardView(ctk.CTkFrame):
                 prox_fec,
                 f"{a['badge']} - {a['resumen_alerta']}"
             ), tags=(tag,))
-
