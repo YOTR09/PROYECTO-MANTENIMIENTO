@@ -80,6 +80,28 @@ TEXT_SECONDARY = "#6B7280"   # Texto secundario (subvalores KPI)
 TEXT_ACCENT_BLUE = "#3B82F6" # Texto de acento informativo
 
 
+# ==============================================================================
+# TIPOGRAFÍAS ESTANDARIZADAS
+# ==============================================================================
+FONT_TITLE = ("Segoe UI", 22, "bold")       # Títulos de sección / cabeceras
+FONT_SUBTITLE = ("Segoe UI", 16, "bold")    # Subtítulos de tarjetas / formularios
+FONT_BODY = ("Segoe UI", 14)                # Texto de navegación / contenido general
+FONT_SMALL = ("Segoe UI", 12)               # Labels, campos, Treeview
+FONT_SMALL_BOLD = ("Segoe UI", 12, "bold")  # Encabezados de tabla, KPI títulos
+FONT_CAPTION = ("Segoe UI", 11)             # Subtexto de KPIs, ayuda
+
+# ==============================================================================
+# DIMENSIONES ESTANDARIZADAS
+# ==============================================================================
+SIDEBAR_WIDTH = 240
+FORM_CARD_WIDTH = 330
+BTN_NAV_HEIGHT = 42
+CORNER_RADIUS = 10
+CORNER_RADIUS_NONE = 0
+PAD_SECTION_X = 20
+PAD_SECTION_Y = 15
+
+
 def configurar_estilos_treeview():
     """
     Configura el estilo global para todas las tablas ttk.Treeview de la aplicación.
@@ -90,12 +112,22 @@ def configurar_estilos_treeview():
     # Filas de datos
     style.configure(
         "Treeview",
-        font=("Segoe UI", 12),
+        font=FONT_SMALL,
         rowheight=30
     )
     
     # Encabezados de columnas
     style.configure(
         "Treeview.Heading",
-        font=("Segoe UI", 12, "bold")
+        font=FONT_SMALL_BOLD
     )
+
+
+def configurar_tags_semaforo(tree):
+    """
+    Aplica los tags de color semáforo (vencido, por_vencer, al_dia) a un Treeview.
+    Centraliza la configuración para evitar duplicación en múltiples vistas.
+    """
+    tree.tag_configure("vencido", background=TAG_VENCIDO_BG, foreground=TAG_VENCIDO_FG)
+    tree.tag_configure("por_vencer", background=TAG_POR_VENCER_BG, foreground=TAG_POR_VENCER_FG)
+    tree.tag_configure("al_dia", background=TAG_AL_DIA_BG, foreground=TAG_AL_DIA_FG)
