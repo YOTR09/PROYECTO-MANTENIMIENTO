@@ -4,6 +4,18 @@ import customtkinter as ctk
 from src.services.vehiculo_service import VehiculoService
 from src.services.socio_service import SocioService
 from src.models.enums import EstadoVehiculo
+from src.views.theme import (
+    BTN_SUCCESS_COLOR,
+    BTN_SUCCESS_HOVER,
+    BTN_PRIMARY_COLOR,
+    BTN_PRIMARY_HOVER,
+    BTN_WARNING_COLOR,
+    BTN_WARNING_HOVER,
+    BTN_NEUTRAL_COLOR,
+    BTN_NEUTRAL_HOVER,
+    BTN_DANGER_COLOR,
+    BTN_DANGER_HOVER,
+)
 
 class VehiculosView(ctk.CTkFrame):
     def __init__(self, parent):
@@ -116,19 +128,19 @@ class VehiculosView(ctk.CTkFrame):
         self.combo_status.pack(fill="x", padx=20, pady=(0, 12))
 
         # Botones
-        self.btn_guardar = ctk.CTkButton(self.form_card, text="➕ Guardar Unidad", fg_color="#10B981", hover_color="#059669", command=self.guardar)
+        self.btn_guardar = ctk.CTkButton(self.form_card, text="➕ Guardar Unidad", fg_color=BTN_SUCCESS_COLOR, hover_color=BTN_SUCCESS_HOVER, command=self.guardar)
         self.btn_guardar.pack(fill="x", padx=20, pady=4)
 
-        self.btn_actualizar = ctk.CTkButton(self.form_card, text="✏️ Actualizar Unidad", fg_color="#3B82F6", hover_color="#2563EB", command=self.actualizar)
+        self.btn_actualizar = ctk.CTkButton(self.form_card, text="✏️ Actualizar Unidad", fg_color=BTN_PRIMARY_COLOR, hover_color=BTN_PRIMARY_HOVER, command=self.actualizar)
         self.btn_actualizar.pack(fill="x", padx=20, pady=4)
 
-        self.btn_odometro = ctk.CTkButton(self.form_card, text="⚡ Actualizar Solo Odómetro", fg_color="#F59E0B", hover_color="#D97706", command=self.actualizar_solo_odometro)
+        self.btn_odometro = ctk.CTkButton(self.form_card, text="⚡ Actualizar Solo Odómetro", fg_color=BTN_WARNING_COLOR, hover_color=BTN_WARNING_HOVER, command=self.actualizar_solo_odometro)
         self.btn_odometro.pack(fill="x", padx=20, pady=4)
 
-        self.btn_limpiar = ctk.CTkButton(self.form_card, text="🧹 Limpiar Campos", fg_color="#6B7280", hover_color="#4B5563", command=self.limpiar_formulario)
+        self.btn_limpiar = ctk.CTkButton(self.form_card, text="🧹 Limpiar Campos", fg_color=BTN_NEUTRAL_COLOR, hover_color=BTN_NEUTRAL_HOVER, command=self.limpiar_formulario)
         self.btn_limpiar.pack(fill="x", padx=20, pady=4)
 
-        self.btn_eliminar = ctk.CTkButton(self.form_card, text="🗑️ Eliminar Unidad", fg_color="#EF4444", hover_color="#DC2626", command=self.eliminar)
+        self.btn_eliminar = ctk.CTkButton(self.form_card, text="🗑️ Eliminar Unidad", fg_color=BTN_DANGER_COLOR, hover_color=BTN_DANGER_HOVER, command=self.eliminar)
         self.btn_eliminar.pack(fill="x", padx=20, pady=(4, 10))
 
         # ---------------- TABLA DE DATOS ----------------
@@ -320,4 +332,3 @@ class VehiculosView(ctk.CTkFrame):
         self.var_status.set(EstadoVehiculo.ACTIVO.value)
         if self.tree.selection():
             self.tree.selection_remove(self.tree.selection())
-
