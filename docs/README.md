@@ -29,5 +29,8 @@ Bienvenido al centro de documentación técnica y operativa del proyecto. Aquí 
    - **Copias de Seguridad (Backups):** Cómo respaldar y restaurar la base de datos `data/mantenimiento.db`.
    - **Pruebas Automatizadas:** Cómo ejecutar los tests unitarios.
 
+3. [🔐 Acceso al Sistema (LOGIN.md)](LOGIN.md)
+   - **Inicio de sesión:** Credenciales iniciales del administrador y alcance de esta autenticación básica.
+
 ---
 Para volver a la raíz del proyecto, consulta el [`README.md`](../README.md) principal.

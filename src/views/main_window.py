@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from src.views.login_view import LoginView
 from src.views.dashboard_view import DashboardView
 from src.views.vehiculos_view import VehiculosView
 from src.views.socios_view import SociosView
@@ -11,8 +12,8 @@ class MainWindow(ctk.CTk):
         super().__init__()
 
         self.title("Brisas del Palmar - Control de Flota y Mantenimiento Preventivo")
-        self.geometry("1240x760")
-        self.minsize(1050, 680)
+        self.geometry("520x540")
+        self.minsize(440, 480)
 
         # Configuración de tema visual
         ctk.set_appearance_mode("Dark")
@@ -22,6 +23,13 @@ class MainWindow(ctk.CTk):
         self.botones_nav = {}
         self.vista_actual_key = None
 
+        self.login_view = LoginView(self, on_success=self._abrir_aplicacion)
+        self.login_view.pack(fill="both", expand=True)
+
+    def _abrir_aplicacion(self):
+        self.login_view.destroy()
+        self.geometry("1240x760")
+        self.minsize(1050, 680)
         self._setup_layout()
         self._inicializar_vistas()
         self.cambiar_vista("dashboard")

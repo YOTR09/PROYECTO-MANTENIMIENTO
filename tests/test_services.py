@@ -10,6 +10,14 @@ from src.services.socio_service import SocioService
 from src.services.vehiculo_service import VehiculoService
 from src.services.tipo_mantenimiento_service import TipoMantenimientoService
 from src.services.mantenimiento_service import MantenimientoService
+from src.services.autenticacion_service import AutenticacionService
+
+
+class TestAutenticacion(unittest.TestCase):
+    def test_credenciales_administrador(self):
+        self.assertTrue(AutenticacionService.validar_credenciales("admin123", "adminx123"))
+        self.assertFalse(AutenticacionService.validar_credenciales("otro", "adminx123"))
+        self.assertFalse(AutenticacionService.validar_credenciales("admin123", "incorrecta"))
 
 class TestSistemaMantenimiento(unittest.TestCase):
     @classmethod
