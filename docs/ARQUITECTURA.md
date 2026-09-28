@@ -18,6 +18,11 @@ graph TD
         V_Prog[ProgramacionMantView]
         V_Tip[TiposMantView]
         V_Hist[HistorialMantView]
+        THEME[theme.py - Estilos y Paleta]
+    end
+
+    subgraph Dominio ["Modelos y Tipos de Dominio (models/)"]
+        ENUMS[enums.py - Estados y Constantes]
     end
 
     subgraph Negocio ["2. Capa de Lógica de Negocio (Services)"]
@@ -36,12 +41,14 @@ graph TD
     end
 
     MW --> V_Dash & V_Veh & V_Soc & V_Prog & V_Tip & V_Hist
+    THEME -.-> V_Dash & V_Veh & V_Soc & V_Prog & V_Tip & V_Hist & MW
+    ENUMS -.-> S_Veh & V_Veh & S_Mant
     V_Dash --> S_Mant & S_Veh
     V_Veh --> S_Veh --> R_Veh --> DB
     V_Soc --> S_Soc --> R_Soc --> DB
     V_Tip --> S_Tip --> R_Tip --> DB
     V_Prog --> S_Mant --> R_Mant --> DB
-    V_Hist --> S_Mant
+    V_Hist --> S_Mant --> R_Mant
 ```
 
 ### Principios de Separación
@@ -50,6 +57,8 @@ graph TD
 2. **Los Servicios (`services/`) concentran las reglas del negocio:** Aquí residen las validaciones de entrada, el cálculo matemático de fechas y kilometrajes, las condiciones de semaforización y la lógica de reprogramación automática.
 3. **Los Repositorios (`repositories/`) aíslan el motor de datos:** Encapsulan todas las consultas SQL (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) y transacciones.
 4. **Configuración Centralizada (`config/database.py`):** Ningún archivo almacena rutas o credenciales duplicadas. Toda la conexión, manejo de claves foráneas y migraciones DDL se gestionan en este punto.
+5. **Modelos y Tipos Compartidos (`src/models/`):** Centraliza las enumeraciones y constantes de estado (`EstadoVehiculo`, `EstadoSocio`, `EstadoMantenimiento`) para eliminar cadenas mágicas y garantizar coherencia entre capas.
+6. **Módulo Centralizado de Estilos (`src/views/theme.py`):** Estandariza la paleta cromática (botones, semáforos, alertas), tipografías, dimensiones y estilos de tablas `ttk.Treeview` en toda la interfaz.
 
 ---
 
@@ -175,17 +184,25 @@ PROYECTO-MANTENIMIENTO/
 │   ├── GUIA_INSTALACION_Y_USO.md   # Guía paso a paso de despliegue y manual de usuario
 │   └── README.md                   # Índice general de documentación
 ├── src/
+│   ├── __init__.py
+│   ├── models/                     # Modelos y enumeraciones de dominio compartidas
+│   │   ├── __init__.py
+│   │   └── enums.py                # Enums tipados (EstadoVehiculo, EstadoSocio, EstadoMantenimiento)
 │   ├── repositories/               # Capa de Acceso a Datos
+│   │   ├── __init__.py
 │   │   ├── socio_repository.py
 │   │   ├── vehiculo_repository.py
 │   │   ├── tipo_mantenimiento_repository.py
 │   │   └── mantenimiento_repository.py
 │   ├── services/                   # Capa de Lógica de Negocio y Reglas
+│   │   ├── __init__.py
 │   │   ├── socio_service.py
 │   │   ├── vehiculo_service.py
 │   │   ├── tipo_mantenimiento_service.py
 │   │   └── mantenimiento_service.py
 │   └── views/                      # Capa de Presentación (CustomTkinter)
+│       ├── __init__.py
+│       ├── theme.py                # Paleta corporativa, tipografía estándar y estilos Treeview
 │       ├── main_window.py          # Ventana principal con barra lateral de navegación
 │       ├── dashboard_view.py       # KPIs y panel de alertas críticas
 │       ├── vehiculos_view.py       # Gestión de flota con número de unidad y odómetro
@@ -196,9 +213,11 @@ PROYECTO-MANTENIMIENTO/
 ├── tests/
 │   └── test_services.py            # Suite de pruebas unitarias automáticas
 ├── data/
-│   └── mantenimiento.db            # Base de datos SQLite (se auto-genera en la 1ra ejecución)
+│   ├── mantenimiento.db            # Base de datos SQLite (se auto-genera en la 1ra ejecución)
+│   └── test_mantenimiento.db       # Base de datos aislada para testing (auto-generada)
+├── CHANGELOG.md                    # Bitácora de cambios y versiones del proyecto
 ├── main.py                         # Punto de entrada de la aplicación
 ├── requirements.txt                # Lista de librerías requeridas (customtkinter)
-├── .gitignore                      # Exclusión de entornos virtuales y cachés
+├── .gitignore                      # Exclusión de entornos virtuales, bases de datos y cachés
 └── README.md                       # Resumen rápido del repositorio
 ```
