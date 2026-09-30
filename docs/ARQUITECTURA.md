@@ -6,12 +6,13 @@
 
 ## 1. Visión General de la Arquitectura
 
-El sistema está diseñado bajo un patrón arquitectónico en **3 Capas Desacopladas (Layered Architecture / MVC adaptado a GUI de escritorio)**. Cada capa posee responsabilidades estrictamente delimitadas, garantizando mantenibilidad, alta cohesión y bajo acoplamiento.
+El sistema está diseñado bajo un patrón arquitectónico en **3 Capas Desacopladas (Layered Architecture / MVC adaptado a GUI de escritorio)**, complementado con un módulo de autenticación previa, modelos de dominio compartidos y configuración visual centralizada.
 
 ```mermaid
 graph TD
     subgraph Presentacion ["1. Capa de Presentación (UI - CustomTkinter)"]
-        MW[MainWindow - Navegación Principal]
+        MW[MainWindow - Contenedor y Navegación]
+        V_Log[LoginView - Pantalla de Acceso]
         V_Dash[DashboardView]
         V_Veh[VehiculosView]
         V_Soc[SociosView]
@@ -26,6 +27,7 @@ graph TD
     end
 
     subgraph Negocio ["2. Capa de Lógica de Negocio (Services)"]
+        S_Auth[AutenticacionService]
         S_Veh[VehiculoService]
         S_Soc[SocioService]
         S_Tip[TipoMantenimientoService]
@@ -40,6 +42,9 @@ graph TD
         DB[(database.py / SQLite Engine)]
     end
 
+    MW --> V_Log
+    V_Log --> S_Auth
+    V_Log -.->|Acceso Concedido| MW
     MW --> V_Dash & V_Veh & V_Soc & V_Prog & V_Tip & V_Hist
     THEME -.-> V_Dash & V_Veh & V_Soc & V_Prog & V_Tip & V_Hist & MW
     ENUMS -.-> S_Veh & V_Veh & S_Mant
@@ -59,6 +64,7 @@ graph TD
 4. **Configuración Centralizada (`config/database.py`):** Ningún archivo almacena rutas o credenciales duplicadas. Toda la conexión, manejo de claves foráneas y migraciones DDL se gestionan en este punto.
 5. **Modelos y Tipos Compartidos (`src/models/`):** Centraliza las enumeraciones y constantes de estado (`EstadoVehiculo`, `EstadoSocio`, `EstadoMantenimiento`) para eliminar cadenas mágicas y garantizar coherencia entre capas.
 6. **Módulo Centralizado de Estilos (`src/views/theme.py`):** Estandariza la paleta cromática (botones, semáforos, alertas), tipografías, dimensiones y estilos de tablas `ttk.Treeview` en toda la interfaz.
+7. **Servicio de Autenticación Ligero (`src/services/autenticacion_service.py`):** Desacopla la validación de credenciales del diseño visual de `LoginView`. Valida credenciales de administrador directamente en memoria/código para instalaciones locales de un solo administrador.
 
 ---
 
@@ -182,6 +188,7 @@ PROYECTO-MANTENIMIENTO/
 ├── docs/                           # Documentación técnica y manuales de usuario
 │   ├── ARQUITECTURA.md             # Este documento
 │   ├── GUIA_INSTALACION_Y_USO.md   # Guía paso a paso de despliegue y manual de usuario
+│   ├── LOGIN.md                    # Credenciales y alcance del módulo de autenticación
 │   └── README.md                   # Índice general de documentación
 ├── src/
 │   ├── __init__.py
@@ -196,6 +203,7 @@ PROYECTO-MANTENIMIENTO/
 │   │   └── mantenimiento_repository.py
 │   ├── services/                   # Capa de Lógica de Negocio y Reglas
 │   │   ├── __init__.py
+│   │   ├── autenticacion_service.py # Validación de credenciales de acceso
 │   │   ├── socio_service.py
 │   │   ├── vehiculo_service.py
 │   │   ├── tipo_mantenimiento_service.py
@@ -203,6 +211,7 @@ PROYECTO-MANTENIMIENTO/
 │   └── views/                      # Capa de Presentación (CustomTkinter)
 │       ├── __init__.py
 │       ├── theme.py                # Paleta corporativa, tipografía estándar y estilos Treeview
+│       ├── login_view.py           # Pantalla modal de inicio de sesión
 │       ├── main_window.py          # Ventana principal con barra lateral de navegación
 │       ├── dashboard_view.py       # KPIs y panel de alertas críticas
 │       ├── vehiculos_view.py       # Gestión de flota con número de unidad y odómetro
@@ -211,7 +220,7 @@ PROYECTO-MANTENIMIENTO/
 │       ├── tipos_mant_view.py      # CRUD de rutinas de mantenimiento preventivo
 │       └── historial_mant_view.py  # Bitácora histórica y auditoría de costos
 ├── tests/
-│   └── test_services.py            # Suite de pruebas unitarias automáticas
+│   └── test_services.py            # Suite de pruebas unitarias automáticas (3 pruebas)
 ├── data/
 │   ├── mantenimiento.db            # Base de datos SQLite (se auto-genera en la 1ra ejecución)
 │   └── test_mantenimiento.db       # Base de datos aislada para testing (auto-generada)

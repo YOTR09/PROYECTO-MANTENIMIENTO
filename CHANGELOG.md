@@ -3,6 +3,18 @@
 Todas las modificaciones notables de este proyecto serán documentadas en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [1.2.0] - 2026-09-30
+
+### Agregado
+- Pantalla de inicio de sesión y autenticación previa ([`login_view.py`](src/views/login_view.py)).
+- Servicio de validación de credenciales de administrador ([`autenticacion_service.py`](src/services/autenticacion_service.py)).
+- Documentación de acceso al sistema y alcance de seguridad ([`LOGIN.md`](docs/LOGIN.md)).
+- Prueba unitaria de autenticación ([`test_services.py`](tests/test_services.py)) elevando la suite a 3 pruebas automáticas.
+
+### Modificado
+- Integración en [`main_window.py`](src/views/main_window.py) para requerir autenticación exitosa antes de inicializar la barra de navegación y las vistas de gestión.
+- Actualización de manuales de usuario y diagramas arquitectónicos para reflejar la ventana modal de login.
+
 ## [1.1.0] - 2026-09-27
 
 ### Agregado

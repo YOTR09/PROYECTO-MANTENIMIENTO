@@ -6,32 +6,35 @@ Aplicación de escritorio moderna desarrollada en Python y CustomTkinter para la
 
 ## 🚀 Características Principales
 
-1. **Panel de Control (Dashboard):**
+1. **Control de Acceso y Autenticación:**
+   - Pantalla de inicio de sesión previa para protección de acceso a la aplicación.
+   - Validación de credenciales de administrador (`admin123` / `adminx123`) con soporte de acceso rápido mediante la tecla **Enter**.
+2. **Panel de Control (Dashboard):**
    - Indicadores en tiempo real: Unidades activas, en taller, mantenimientos al día, próximos a vencer y vencidos.
    - Tabla de atención inmediata con semaforización de alertas.
-2. **Gestión de Flota y Unidades:**
+3. **Gestión de Flota y Unidades:**
    - Registro de vehículos con **Número de Unidad** (ej. *Unidad 01*, *Bus 14*), placa, marca/modelo, año y odómetro actual.
    - Botón de **"Actualización Rápida de Odómetro"** para registrar los kilómetros acumulados tras cada jornada sin editar toda la ficha.
-3. **Gestión de Socios y Propietarios:**
+4. **Gestión de Socios y Propietarios:**
    - Control de afiliados/dueños de las unidades con validación de documentos y protección contra borrado accidental de socios con vehículos asignados.
-4. **Control y Semaforización Preventiva:**
+5. **Control y Semaforización Preventiva:**
    - Programación de servicios por **kilometraje** y/o **tiempo (días)**.
    - **Semáforo Dinámico:**
      - 🟢 **Al Día:** Operación segura.
      - 🟡 **Por Vencer:** Faltan menos de 500 km o menos de 10 días.
      - 🔴 **Vencido:** Kilometraje superado o fecha vencida sin registro.
    - Registro de mantenimientos ejecutados con actualización automática del odómetro y cálculo del próximo servicio.
-5. **Catálogo de Mantenimientos (CRUD):**
+6. **Catálogo de Mantenimientos (CRUD):**
    - Pre-cargado con las 10 rutinas estándar de la industria del transporte público (aceite, filtros, frenos, engrase, rodamientos, suspensión, etc.).
    - Capacidad de crear, editar o ajustar frecuencias de cualquier rutina.
-6. **Bitácora Histórica:**
+7. **Bitácora Histórica:**
    - Registro detallado de costos, talleres, mecánicos y repuestos utilizados.
 
 ---
 
 ## 🛠️ Arquitectura del Sistema
 
-El proyecto implementa una arquitectura en capas desacopladas (Presentación, Lógica de Negocio y Acceso a Datos), complementada con modelos de dominio compartidos y configuración visual centralizada:
+El proyecto implementa una arquitectura en capas desacopladas (Presentación, Lógica de Negocio y Acceso a Datos), complementada con autenticación, modelos de dominio compartidos y configuración visual centralizada:
 
 ```text
 PROYECTO-MANTENIMIENTO/
@@ -44,6 +47,7 @@ PROYECTO-MANTENIMIENTO/
 ├── docs/                       # Documentación técnica y manuales de usuario
 │   ├── ARQUITECTURA.md         # Diseño técnico, diagrama ER y semaforización
 │   ├── GUIA_INSTALACION_Y_USO.md # Guía paso a paso y manual de usuario
+│   ├── LOGIN.md                # Credenciales y alcance del módulo de autenticación
 │   └── README.md               # Centro de documentación
 ├── src/
 │   ├── models/                 # Modelos y enumeraciones de dominio compartidas
@@ -51,11 +55,14 @@ PROYECTO-MANTENIMIENTO/
 │   │   └── enums.py            # Enums: EstadoVehiculo, EstadoSocio, EstadoMantenimiento
 │   ├── repositories/           # Capa de Acceso a Datos (Consultas SQL seguras)
 │   ├── services/               # Lógica de Negocio, Validaciones y Semaforización
+│   │   ├── autenticacion_service.py # Validación de credenciales de administrador
+│   │   └── ...                 # Servicios de negocio (vehículo, socio, mantenimientos)
 │   └── views/                  # Interfaz Gráfica Moderna (CustomTkinter)
 │       ├── theme.py            # Paleta de colores, tipografía y estilos Treeview
+│       ├── login_view.py       # Pantalla modal de inicio de sesión
 │       └── ...                 # Vistas funcionales (Dashboard, Flota, Socios, etc.)
 ├── tests/
-│   └── test_services.py        # Suite de pruebas unitarias automáticas
+│   └── test_services.py        # Suite de pruebas unitarias automáticas (3 pruebas)
 ├── data/
 │   └── mantenimiento.db        # Base de datos local portable SQLite (auto-generada)
 ├── CHANGELOG.md                # Bitácora de cambios y versiones del proyecto
@@ -80,7 +87,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-*(Al iniciar por primera vez, el sistema creará automáticamente la base de datos `data/mantenimiento.db` y cargará el catálogo de mantenimientos iniciales).*
+*(Al iniciar, la aplicación mostrará la ventana de inicio de sesión. Utiliza las credenciales por defecto: Usuario: `admin123` | Contraseña: `adminx123`).*
 
 ### 3. Ejecutar las Pruebas Unitarias
 
@@ -94,5 +101,6 @@ python -m unittest discover tests
 
 Para una explicación técnica profunda y manuales detallados, consulta la carpeta [`docs/`](docs/):
 
-- **[Arquitectura y Diseño Técnico (`docs/ARQUITECTURA.md`)](docs/ARQUITECTURA.md):** Explicación de las 3 capas, justificación de SQLite, modelo entidad-relación y algoritmo de semaforización.
+- **[Acceso y Seguridad (`docs/LOGIN.md`)](docs/LOGIN.md):** Credenciales de acceso, funcionamiento del inicio de sesión y consideraciones de seguridad.
+- **[Arquitectura y Diseño Técnico (`docs/ARQUITECTURA.md`)](docs/ARQUITECTURA.md):** Explicación de las capas, justificación de SQLite, modelo entidad-relación y algoritmo de semaforización.
 - **[Guía de Instalación y Manual de Usuario (`docs/GUIA_INSTALACION_Y_USO.md`)](docs/GUIA_INSTALACION_Y_USO.md):** Manual paso a paso por módulos, cómo respaldar la base de datos y preguntas frecuentes.

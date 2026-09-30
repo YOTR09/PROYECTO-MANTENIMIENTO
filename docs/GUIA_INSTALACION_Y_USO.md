@@ -76,7 +76,22 @@ venv/bin/python main.py
 
 ## 🧭 Manual de Uso del Sistema
 
-La ventana principal cuenta con una **barra lateral izquierda (Sidebar)** que te permite cambiar entre los distintos módulos con un solo clic.
+### Módulo 0: Acceso al Sistema (Inicio de Sesión)
+
+Al ejecutar la aplicación, lo primero que se mostrará es la pantalla de autenticación con dimensiones compactas (`520x540`):
+
+1. **Credenciales predeterminadas de administrador:**
+   - **Usuario:** `admin123`
+   - **Contraseña:** `adminx123`
+2. Puedes pulsar el botón **"Iniciar sesión"** o presionar la tecla **Enter** desde cualquiera de los dos campos de texto.
+3. Si los datos no coinciden, se mostrará el aviso en rojo *"Usuario o contraseña incorrectos"*.
+4. Al ingresar correctamente, la ventana se expande al tamaño operativo (`1240x760`) y carga el panel principal.
+
+---
+
+### Módulos Principales de Gestión
+
+Una vez iniciada la sesión, la ventana principal cuenta con una **barra lateral izquierda (Sidebar)** que te permite cambiar entre los distintos módulos con un solo clic.
 
 ```text
 [ Barra Lateral ]           [ Área de Trabajo Principal ]
@@ -218,7 +233,7 @@ Respaldar toda la información de Brisas del Palmar es sumamente sencillo:
 
 ## 🧪 Ejecución de Pruebas Unitarias
 
-El proyecto incluye pruebas automatizadas para verificar la integridad de los servicios y el cálculo de alertas preventivas. Para ejecutarlas:
+El proyecto incluye pruebas automatizadas para verificar la autenticación, la integridad de los servicios y el cálculo de alertas preventivas. Para ejecutarlas:
 
 ```bash
 python -m unittest discover tests
@@ -227,9 +242,14 @@ python -m unittest discover tests
 Salida esperada:
 
 ```text
-..
+...
 ----------------------------------------------------------------------
-Ran 2 tests in 0.050s
+Ran 3 tests in 0.064s
 
 OK
 ```
+
+Las 3 pruebas cubren:
+1. `TestAutenticacion`: Validación de credenciales de administrador y rechazo de accesos no autorizados.
+2. `test_flujo_socio_y_vehiculo`: Integridad referencial de socios y vehículos, unicidad de cédula/placa/unidad y protección contra eliminación.
+3. `test_programacion_mantenimiento_y_alertas`: Motor de semáforo preventivo (Al Día, Por Vencer, Vencido), actualización de odómetro y recálculo automático de próximos servicios.
