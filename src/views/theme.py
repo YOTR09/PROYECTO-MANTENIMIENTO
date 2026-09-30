@@ -43,12 +43,15 @@ KPI_INFO_HOVER = "#2563EB"
 
 # Señal de Peligro / Vencidos (Rojo Brillante)
 KPI_DANGER_COLOR = "#EF4444"
+KPI_DANGER_HOVER = "#DC2626"
 
 # Señal de Advertencia / Por Vencer (Ámbar)
 KPI_WARNING_COLOR = "#F59E0B"
+KPI_WARNING_HOVER = "#D97706"
 
 # Señal de Éxito / Al Día (Esmeralda Brillante)
 KPI_SUCCESS_COLOR = "#10B981"
+KPI_SUCCESS_HOVER = "#059669"
 
 # ==============================================================================
 # COLORES DE FILAS SEMÁFORO EN TABLAS (TREEVIEW TAGS)

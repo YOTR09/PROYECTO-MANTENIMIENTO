@@ -18,13 +18,37 @@ from src.views.theme import (
 )
 
 class VehiculosView(ctk.CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, *args, usuario_actual=None, **kwargs):
         super().__init__(parent, corner_radius=10)
+        self.usuario_actual = usuario_actual
         self.vehiculo_seleccionado_id = None
         self.dict_socios = {} # Mapeo "Nombre (Cédula)" -> id_socio
         self._setup_ui()
+        self._aplicar_permisos()
         self.cargar_socios()
         self.cargar_datos()
+
+    def _aplicar_permisos(self):
+        if not self.usuario_actual:
+            return
+        if hasattr(self.usuario_actual, "es_operador") and self.usuario_actual.es_operador:
+            if hasattr(self, "btn_guardar"):
+                self.btn_guardar.configure(state="disabled")
+            if hasattr(self, "btn_actualizar"):
+                self.btn_actualizar.configure(state="disabled")
+            if hasattr(self, "btn_odometro"):
+                self.btn_odometro.configure(state="disabled")
+            if hasattr(self, "btn_eliminar"):
+                self.btn_eliminar.configure(state="disabled")
+        elif hasattr(self.usuario_actual, "es_mecanico") and self.usuario_actual.es_mecanico:
+            if hasattr(self, "btn_guardar"):
+                self.btn_guardar.configure(state="disabled")
+            if hasattr(self, "btn_actualizar"):
+                self.btn_actualizar.configure(state="disabled")
+            if hasattr(self, "btn_eliminar"):
+                self.btn_eliminar.configure(state="disabled")
+            if hasattr(self, "btn_odometro"):
+                self.btn_odometro.configure(state="normal")
 
     def _setup_ui(self):
         # Cabecera
