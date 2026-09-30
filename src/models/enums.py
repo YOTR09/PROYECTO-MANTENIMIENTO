@@ -14,3 +14,7 @@ class EstadoMantenimiento(str, Enum):
     POR_VENCER = "Por Vencer"
     VENCIDO = "Vencido"
 
+class RolUsuario(str, Enum):
+    ADMINISTRADOR = "Administrador"
+    MECANICO = "Mecanico"
+    OPERADOR = "Operador"

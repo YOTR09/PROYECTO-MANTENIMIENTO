@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
-from src.services.mantenimiento_service import MantenimientoService
+from src.controllers.mantenimiento_controller import MantenimientoController
 
 class HistorialMantView(ctk.CTkFrame):
     def __init__(self, parent):
@@ -71,19 +71,19 @@ class HistorialMantView(ctk.CTkFrame):
             self.tree.delete(item)
 
         termino = self.entry_buscar.get()
-        historial = MantenimientoService.listar_historial(search_term=termino)
+        historial = MantenimientoController.listar_historial(search_term=termino)
 
         for h in historial:
-            costo_txt = f"${h['costo']:,.2f}" if h['costo'] else "$0.00"
+            costo_txt = f"${h.costo:,.2f}" if h.costo else "$0.00"
             self.tree.insert("", "end", values=(
-                h["id_historial"],
-                h["fecha_realizado"],
-                h["numero_unidad"],
-                h["placa"],
-                h["tipo_nombre"],
-                f"{h['km_al_momento']:,} km",
+                h.id_historial,
+                h.fecha_realizado,
+                h.numero_unidad,
+                h.placa,
+                h.tipo_nombre,
+                f"{h.km_al_momento:,} km",
                 costo_txt,
-                h["taller_mecanico"] or "-",
-                h["descripcion_trabajo"] or "-"
+                h.taller_mecanico or "-",
+                h.descripcion_trabajo or "-"
             ))
 

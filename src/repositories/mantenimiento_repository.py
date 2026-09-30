@@ -1,8 +1,8 @@
-from config.database import get_db_connection, get_db_cursor
+from config.database import get_db_cursor
 
 class MantenimientoRepository:
     @staticmethod
-    def get_programaciones(id_vehiculo=None, search_term=None):
+    def get_programaciones(id_vehiculo=None, search_term=None, solo_activos=True):
         with get_db_cursor() as cursor:
             query = """
                 SELECT 
@@ -14,6 +14,7 @@ class MantenimientoRepository:
                     mp.fecha_proximo_servicio,
                     mp.km_proximo_servicio,
                     mp.observaciones,
+                    mp.activo,
                     v.numero_unidad,
                     v.placa,
                     v.marca_modelo,
@@ -30,6 +31,9 @@ class MantenimientoRepository:
                 WHERE 1=1
             """
             params = []
+            if solo_activos:
+                query += " AND mp.activo = 1 AND v.activo = 1 AND tm.activo = 1"
+
             if id_vehiculo:
                 query += " AND mp.id_vehiculo = ?"
                 params.append(id_vehiculo)
@@ -68,7 +72,6 @@ class MantenimientoRepository:
     @staticmethod
     def upsert_programacion(id_vehiculo, id_tipo, fecha_ultimo, km_ultimo, fecha_proximo, km_proximo, observaciones=""):
         with get_db_cursor(commit=True) as cursor:
-            # Revisa si ya existe para hacer update o insert
             cursor.execute(
                 "SELECT id_programacion FROM mantenimiento_programado WHERE id_vehiculo = ? AND id_tipo = ?",
                 (id_vehiculo, id_tipo)
@@ -78,7 +81,7 @@ class MantenimientoRepository:
                 cursor.execute(
                     """
                     UPDATE mantenimiento_programado
-                    SET fecha_ultimo_servicio = ?, km_ultimo_servicio = ?, fecha_proximo_servicio = ?, km_proximo_servicio = ?, observaciones = ?
+                    SET fecha_ultimo_servicio = ?, km_ultimo_servicio = ?, fecha_proximo_servicio = ?, km_proximo_servicio = ?, observaciones = ?, activo = 1
                     WHERE id_programacion = ?
                     """,
                     (fecha_ultimo, km_ultimo, fecha_proximo, km_proximo, observaciones, existente[0])
@@ -88,17 +91,27 @@ class MantenimientoRepository:
                 cursor.execute(
                     """
                     INSERT INTO mantenimiento_programado 
-                        (id_vehiculo, id_tipo, fecha_ultimo_servicio, km_ultimo_servicio, fecha_proximo_servicio, km_proximo_servicio, observaciones)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                        (id_vehiculo, id_tipo, fecha_ultimo_servicio, km_ultimo_servicio, fecha_proximo_servicio, km_proximo_servicio, observaciones, activo)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 1)
                     """,
                     (id_vehiculo, id_tipo, fecha_ultimo, km_ultimo, fecha_proximo, km_proximo, observaciones)
                 )
                 return cursor.lastrowid
 
     @staticmethod
-    def delete_programacion(id_programacion):
+    def delete_programacion(id_programacion, logico=True):
+        """Eliminación lógica por defecto (activo = 0); física opcional"""
         with get_db_cursor(commit=True) as cursor:
-            cursor.execute("DELETE FROM mantenimiento_programado WHERE id_programacion = ?", (id_programacion,))
+            if logico:
+                cursor.execute("UPDATE mantenimiento_programado SET activo = 0 WHERE id_programacion = ?", (id_programacion,))
+            else:
+                cursor.execute("DELETE FROM mantenimiento_programado WHERE id_programacion = ?", (id_programacion,))
+            return cursor.rowcount > 0
+
+    @staticmethod
+    def restore_programacion(id_programacion):
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute("UPDATE mantenimiento_programado SET activo = 1 WHERE id_programacion = ?", (id_programacion,))
             return cursor.rowcount > 0
 
     @staticmethod
@@ -115,7 +128,7 @@ class MantenimientoRepository:
             return cursor.lastrowid
 
     @staticmethod
-    def get_historial(id_vehiculo=None, search_term=None, limit=200):
+    def get_historial(id_vehiculo=None, search_term=None, limit=500):
         with get_db_cursor() as cursor:
             query = """
                 SELECT 
@@ -153,3 +166,4 @@ class MantenimientoRepository:
             cursor.execute(query, params)
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
+

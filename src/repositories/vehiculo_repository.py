@@ -1,8 +1,8 @@
-from config.database import get_db_connection, get_db_cursor
+from config.database import get_db_cursor
 
 class VehiculoRepository:
     @staticmethod
-    def get_all(search_term=None, status_filter=None):
+    def get_all(search_term=None, status_filter=None, solo_activos=True):
         with get_db_cursor() as cursor:
             query = """
                 SELECT 
@@ -14,6 +14,7 @@ class VehiculoRepository:
                     v.ano,
                     v.kilometraje_actual,
                     v.status,
+                    v.activo,
                     s.nombre_completo AS socio_nombre,
                     s.cedula AS socio_cedula
                 FROM vehiculo v
@@ -21,6 +22,9 @@ class VehiculoRepository:
                 WHERE 1=1
             """
             params = []
+            if solo_activos:
+                query += " AND v.activo = 1 AND s.activo = 1"
+
             if search_term:
                 query += " AND (v.numero_unidad LIKE ? OR v.placa LIKE ? OR v.marca_modelo LIKE ? OR s.nombre_completo LIKE ?)"
                 wildcard = f"%{search_term.strip()}%"
@@ -51,16 +55,22 @@ class VehiculoRepository:
             return dict(row) if row else None
 
     @staticmethod
-    def get_by_placa(placa):
+    def get_by_placa(placa, solo_activos=True):
         with get_db_cursor() as cursor:
-            cursor.execute("SELECT * FROM vehiculo WHERE UPPER(placa) = UPPER(?)", (placa.strip(),))
+            query = "SELECT * FROM vehiculo WHERE UPPER(placa) = UPPER(?)"
+            if solo_activos:
+                query += " AND activo = 1"
+            cursor.execute(query, (placa.strip(),))
             row = cursor.fetchone()
             return dict(row) if row else None
 
     @staticmethod
-    def get_by_unidad(numero_unidad):
+    def get_by_unidad(numero_unidad, solo_activos=True):
         with get_db_cursor() as cursor:
-            cursor.execute("SELECT * FROM vehiculo WHERE UPPER(numero_unidad) = UPPER(?)", (numero_unidad.strip(),))
+            query = "SELECT * FROM vehiculo WHERE UPPER(numero_unidad) = UPPER(?)"
+            if solo_activos:
+                query += " AND activo = 1"
+            cursor.execute(query, (numero_unidad.strip(),))
             row = cursor.fetchone()
             return dict(row) if row else None
 
@@ -70,8 +80,8 @@ class VehiculoRepository:
             cursor.execute(
                 """
                 INSERT INTO vehiculo 
-                    (id_socio, numero_unidad, placa, marca_modelo, ano, kilometraje_actual, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (id_socio, numero_unidad, placa, marca_modelo, ano, kilometraje_actual, status, activo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1)
                 """,
                 (id_socio, numero_unidad.strip(), placa.strip().upper(), marca_modelo.strip(), ano, kilometraje_actual, status)
             )
@@ -100,7 +110,19 @@ class VehiculoRepository:
             return cursor.rowcount > 0
 
     @staticmethod
-    def delete(id_vehiculo):
+    def delete(id_vehiculo, logico=True):
+        """Eliminación lógica por defecto (activo = 0); física opcional"""
         with get_db_cursor(commit=True) as cursor:
-            cursor.execute("DELETE FROM vehiculo WHERE id_vehiculo = ?", (id_vehiculo,))
+            if logico:
+                cursor.execute("UPDATE vehiculo SET activo = 0 WHERE id_vehiculo = ?", (id_vehiculo,))
+            else:
+                cursor.execute("DELETE FROM vehiculo WHERE id_vehiculo = ?", (id_vehiculo,))
             return cursor.rowcount > 0
+
+    @staticmethod
+    def restore(id_vehiculo):
+        """Restaura un vehículo eliminado lógicamente"""
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute("UPDATE vehiculo SET activo = 1 WHERE id_vehiculo = ?", (id_vehiculo,))
+            return cursor.rowcount > 0
+

@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
-from src.services.mantenimiento_service import MantenimientoService
+from src.controllers.mantenimiento_controller import MantenimientoController
 from src.views.theme import (
     KPI_INFO_COLOR,
     KPI_INFO_HOVER,
@@ -102,41 +102,41 @@ class DashboardView(ctk.CTkFrame):
         ).pack(side="left")
 
         if self.on_navigate:
-            btn_ir_mant = ctk.CTkButton(
+            btn_ir_preventivo = ctk.CTkButton(
                 header_alertas,
-                text="Ir a Control Preventivo ➔",
-                fg_color=BTN_ACCENT_COLOR,
-                hover_color=BTN_ACCENT_HOVER,
+                text="Ver Todo el Tablero Preventivo ➔",
+                fg_color="transparent",
+                text_color=BTN_ACCENT_COLOR,
+                hover_color=("gray85", "gray25"),
                 command=lambda: self.on_navigate("preventivo")
             )
-            btn_ir_mant.pack(side="right")
+            btn_ir_preventivo.pack(side="right")
 
-        # Tabla de Alertas
         columnas = ("unidad", "placa", "rutina", "km_actual", "prox_km", "prox_fecha", "alerta")
-        self.tree = ttk.Treeview(alertas_container, columns=columnas, show="headings", selectmode="browse")
+        self.tree = ttk.Treeview(alertas_container, columns=columnas, show="headings", height=8, selectmode="browse")
 
         self.tree.heading("unidad", text="Unidad")
         self.tree.heading("placa", text="Placa")
-        self.tree.heading("rutina", text="Rutina Preventiva")
+        self.tree.heading("rutina", text="Rutina")
         self.tree.heading("km_actual", text="Odómetro Actual")
-        self.tree.heading("prox_km", text="Próximo Km")
-        self.tree.heading("prox_fecha", text="Próxima Fecha")
-        self.tree.heading("alerta", text="Estado y Diagnóstico")
+        self.tree.heading("prox_km", text="Próximo Servicio (Km)")
+        self.tree.heading("prox_fecha", text="Fecha Límite")
+        self.tree.heading("alerta", text="Estado de Alerta")
 
         self.tree.column("unidad", width=75, anchor="center")
         self.tree.column("placa", width=85, anchor="center")
         self.tree.column("rutina", width=220, anchor="w")
-        self.tree.column("km_actual", width=110, anchor="e")
-        self.tree.column("prox_km", width=105, anchor="e")
-        self.tree.column("prox_fecha", width=100, anchor="center")
-        self.tree.column("alerta", width=280, anchor="w")
+        self.tree.column("km_actual", width=120, anchor="e")
+        self.tree.column("prox_km", width=130, anchor="e")
+        self.tree.column("prox_fecha", width=105, anchor="center")
+        self.tree.column("alerta", width=220, anchor="w")
 
         configurar_tags_semaforo(self.tree)
 
         scroll_y = ttk.Scrollbar(alertas_container, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scroll_y.set)
-        scroll_y.pack(side="right", fill="y", padx=(0, 5), pady=5)
-        self.tree.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+        scroll_y.pack(side="right", fill="y", padx=(0, 10), pady=(0, 10))
+        self.tree.pack(fill="both", expand=True, padx=(15, 0), pady=(0, 10))
 
     def _crear_kpi_card(self, parent, titulo, valor, subtitulo, color_borde):
         card = ctk.CTkFrame(parent, corner_radius=10, border_width=2, border_color=color_borde)
@@ -150,13 +150,12 @@ class DashboardView(ctk.CTkFrame):
         lbl_sub = ctk.CTkLabel(card, text=subtitulo, font=ctk.CTkFont(size=11), text_color=TEXT_SECONDARY)
         lbl_sub.pack(pady=(0, 12))
 
-        # Almacenamos referencias para actualizar luego
         card.lbl_val = lbl_val
         card.lbl_sub = lbl_sub
         return card
 
     def actualizar_dashboard(self):
-        resumen = MantenimientoService.obtener_resumen_dashboard()
+        resumen = MantenimientoController.obtener_resumen_dashboard()
 
         # Actualizar KPIs
         self.card_unidades.lbl_val.configure(text=f"{resumen['vehiculos_activos']}")
@@ -172,16 +171,17 @@ class DashboardView(ctk.CTkFrame):
 
         alertas = resumen["alertas_urgentes"]
         for a in alertas:
-            tag = "vencido" if a["estado"] == "Vencido" else "por_vencer"
-            prox_km = f"{a['km_proximo_servicio']:,} km" if a["km_proximo_servicio"] > 0 else "N/A"
-            prox_fec = a["fecha_proximo_servicio"] or "N/A"
+            tag = "vencido" if a.estado_alerta == "Vencido" else "por_vencer"
+            prox_km = f"{a.km_proximo_servicio:,} km" if a.km_proximo_servicio > 0 else "N/A"
+            prox_fec = a.fecha_proximo_servicio or "N/A"
 
             self.tree.insert("", "end", values=(
-                a["numero_unidad"],
-                a["placa"],
-                a["tipo_nombre"],
-                f"{a['kilometraje_actual']:,} km",
+                a.numero_unidad,
+                a.placa,
+                a.tipo_nombre,
+                f"{a.kilometraje_actual:,} km",
                 prox_km,
                 prox_fec,
-                f"{a['badge']} - {a['resumen_alerta']}"
+                f"{a.badge_alerta} - {a.observaciones or 'Atención requerida'}"
             ), tags=(tag,))
+
