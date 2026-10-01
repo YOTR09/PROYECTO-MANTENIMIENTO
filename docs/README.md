@@ -8,30 +8,23 @@ Bienvenido al centro de documentación técnica y operativa del proyecto. Aquí 
 
 ## 📑 Índice de Documentos
 
-1. [🏛️ Arquitectura y Estructura del Sistema (ARQUITECTURA.md)](ARQUITECTURA.md)
-   - **Patrón de Arquitectura en 3 Capas:** Presentación (CustomTkinter), Lógica de Negocio (Services) y Acceso a Datos (Repositories).
-   - **Modelos y Estilos Centralizados:** Enumeraciones de estado (`models/enums.py`) y paleta visual estándar (`views/theme.py`).
-   - **Justificación de SQLite:** Portabilidad, cero configuración y rendimiento local.
-   - **Modelo de Datos y Diagrama ER:** Entidades `socio`, `vehiculo`, `tipo_mantenimiento`, `mantenimiento_programado` e `historial_mantenimiento`.
-   - **Motor de Semaforización Preventiva:** Algoritmo y fórmulas para los estados 🟢 *Al Día*, 🟡 *Por Vencer* y 🔴 *Vencido*.
-   - **Estructura detallada del proyecto:** Explicación de cada archivo y directorio.
+1. [🌱 Guía Técnica para Principiantes (guia-principiantes/00-INDICE.md)](guia-principiantes/00-INDICE.md)
+   - Explicación paso a paso y sin tecnicismos del funcionamiento del sistema, herramientas, base de datos, seguridad, reportes y glosario. Ideal para inductores, directivos y nuevos programadores.
 
-2. [📖 Guía de Instalación y Manual de Usuario (GUIA_INSTALACION_Y_USO.md)](GUIA_INSTALACION_Y_USO.md)
-   - **Requisitos del Sistema:** Versiones compatibles de Python y soporte de Tkinter.
-   - **Instalación paso a paso:** Creación de entorno virtual e instalación de dependencias con `pip`.
-   - **Manual de Usuario por Módulos:**
-     - Módulo 1: Gestión de Socios y Afiliados.
-     - Módulo 2: Gestión de Flota (N° de Unidad, Placa, Odómetro) y actualización rápida de kilometraje.
-     - Módulo 3: Catálogo de Mantenimientos (CRUD y las 10 rutinas precargadas).
-     - Módulo 4: Control Preventivo y registro de mantenimientos ejecutados.
-     - Módulo 5: Dashboard y lectura de alertas urgentes.
-     - Módulo 6: Bitácora Histórica y auditoría de costos.
-     - Módulo 7: Cambio de Modo Visual (Oscuro / Claro).
-   - **Copias de Seguridad (Backups):** Cómo respaldar y restaurar la base de datos `data/mantenimiento.db`.
-   - **Pruebas Automatizadas:** Cómo ejecutar los tests unitarios.
+2. [🏛️ Arquitectura y Estructura del Sistema (ARQUITECTURA.md)](ARQUITECTURA.md)
+   - **Patrón Arquitectónico en 3 Capas (MVC):** Presentación (CustomTkinter), Controladores y Orquestación, Acceso a Datos (SQLite).
+   - **Modelo de Datos Normalizado (3FN):** Diagrama ER con las 7 entidades (`rol`, `usuario`, `socio`, `vehiculo`, `tipo_mantenimiento`, `mantenimiento_programado`, `historial_mantenimiento`).
+   - **Motor de Semaforización:** Algoritmos y fórmulas para alertas 🟢 *Al Día*, 🟡 *Por Vencer* y 🔴 *Vencido*.
+   - **Centro de Reportes:** Generadores independientes para PDF y Excel.
 
-3. [🔐 Acceso al Sistema (LOGIN.md)](LOGIN.md)
-   - **Inicio de sesión:** Credenciales iniciales del administrador y alcance de esta autenticación básica.
+3. [📖 Guía de Instalación y Manual de Usuario (GUIA_INSTALACION_Y_USO.md)](GUIA_INSTALACION_Y_USO.md)
+   - Requisitos previos, pasos de instalación con entorno virtual (`venv`) y manual detallado de los 9 módulos funcionales de la aplicación.
+   - Procedimientos de respaldo (*backups*) y ejecución de la suite de 11 pruebas unitarias.
+
+4. [🔐 Acceso al Sistema y Seguridad (LOGIN.md)](LOGIN.md)
+   - Credenciales de prueba para los 3 perfiles funcionales (`admin`, `mecanico`, `auditor`).
+   - Cifrado seguro con **PBKDF2-HMAC-SHA256**, sal aleatoria y verificación en tiempo constante.
+   - Flujo de recuperación de contraseñas mediante preguntas secretas y clave maestra.
 
 ---
 Para volver a la raíz del proyecto, consulta el [`README.md`](../README.md) principal.

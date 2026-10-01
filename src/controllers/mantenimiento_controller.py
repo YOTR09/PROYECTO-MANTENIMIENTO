@@ -1,4 +1,5 @@
 from datetime import datetime, date, timedelta
+from config.database import get_db_transaction
 from src.controllers.base_controller import BaseController
 from src.repositories.mantenimiento_repository import MantenimientoRepository
 from src.repositories.vehiculo_repository import VehiculoRepository
@@ -34,8 +35,15 @@ class MantenimientoController(BaseController):
         except (ValueError, TypeError):
             return False, None, "Los intervalos de kilómetros y días deben ser números enteros no negativos."
 
-        if km == 0 and dias == 0:
-            return False, None, "Debe especificar al menos un intervalo mayor a cero (por km o por días)."
+        existente = TipoMantenimientoRepository.get_by_nombre(nombre, solo_activos=False)
+        if existente:
+            if existente["activo"] == 1:
+                return False, None, f"Ya existe una rutina activa con el nombre '{nombre.strip()}'."
+            # Si existía inactiva, se reactiva con los nuevos parámetros
+            TipoMantenimientoRepository.update(existente["id_tipo"], nombre.strip(), descripcion.strip() if descripcion else "", km, dias)
+            TipoMantenimientoRepository.restore(existente["id_tipo"])
+            tipo = MantenimientoController.obtener_tipo(existente["id_tipo"])
+            return True, tipo, f"Rutina '{nombre.strip()}' reactivada exitosamente con los nuevos parámetros."
 
         try:
             nuevo_id = TipoMantenimientoRepository.create(nombre.strip(), descripcion.strip() if descripcion else "", km, dias)
@@ -136,6 +144,15 @@ class MantenimientoController(BaseController):
         }
 
     @staticmethod
+    def obtener_programacion(id_programacion: int) -> Optional[MantenimientoProgramado]:
+        fila = MantenimientoRepository.get_programacion_by_id(id_programacion)
+        if not fila:
+            return None
+        alerta = MantenimientoController.calcular_estado_alerta(fila)
+        fila.update(alerta)
+        return MantenimientoProgramado.from_dict(fila)
+
+    @staticmethod
     def listar_programaciones(id_vehiculo: Optional[int] = None, search_term: Optional[str] = None, estado_filtro: Optional[str] = None, solo_activos: bool = True) -> List[MantenimientoProgramado]:
         filas = MantenimientoRepository.get_programaciones(id_vehiculo=id_vehiculo, search_term=search_term, solo_activos=solo_activos)
         resultado = []
@@ -147,7 +164,7 @@ class MantenimientoController(BaseController):
         return resultado
 
     @staticmethod
-    def programar_mantenimiento(id_vehiculo: int, id_tipo: int, fecha_ultimo: Optional[str] = None, km_ultimo: int = 0, observaciones: str = "") -> Tuple[bool, Optional[int], str]:
+    def programar_mantenimiento(id_vehiculo: int, id_tipo: int, fecha_ultimo: Optional[str] = None, km_ultimo: int = 0, observaciones: str = "", conn=None) -> Tuple[bool, Optional[int], str]:
         if not id_vehiculo:
             return False, None, "Debe seleccionar un vehículo."
         if not id_tipo:
@@ -188,7 +205,8 @@ class MantenimientoController(BaseController):
                 km_ultimo=km_ult,
                 fecha_proximo=fecha_proxima_str,
                 km_proximo=km_proximo,
-                observaciones=observaciones.strip() if observaciones else ""
+                observaciones=observaciones.strip() if observaciones else "",
+                conn=conn
             )
             return True, id_prog, "Mantenimiento programado exitosamente."
         except Exception as e:
@@ -242,30 +260,35 @@ class MantenimientoController(BaseController):
             return False, None, "El costo debe ser un monto numérico válido."
 
         try:
-            # 1. Registrar en bitácora histórica
-            id_hist = MantenimientoRepository.add_historial(
-                id_vehiculo=id_vehiculo,
-                id_tipo=id_tipo,
-                fecha_realizado=fecha_realizado,
-                km_al_momento=km,
-                costo=costo_val,
-                taller_mecanico=taller.strip() if taller else "",
-                descripcion_trabajo=descripcion.strip() if descripcion else ""
-            )
+            with get_db_transaction() as conn:
+                # 1. Registrar en bitácora histórica
+                id_hist = MantenimientoRepository.add_historial(
+                    id_vehiculo=id_vehiculo,
+                    id_tipo=id_tipo,
+                    fecha_realizado=fecha_realizado,
+                    km_al_momento=km,
+                    costo=costo_val,
+                    taller_mecanico=taller.strip() if taller else "",
+                    descripcion_trabajo=descripcion.strip() if descripcion else "",
+                    conn=conn
+                )
 
-            # 2. Actualizar odómetro del vehículo si es mayor
-            vehiculo = VehiculoRepository.get_by_id(id_vehiculo)
-            if vehiculo and km > vehiculo["kilometraje_actual"]:
-                VehiculoRepository.update_kilometraje(id_vehiculo, km)
+                # 2. Actualizar odómetro del vehículo si es mayor
+                vehiculo = VehiculoRepository.get_by_id(id_vehiculo)
+                if vehiculo and km > vehiculo["kilometraje_actual"]:
+                    VehiculoRepository.update_kilometraje(id_vehiculo, km, conn=conn)
 
-            # 3. Reprogramar próximo servicio automáticamente
-            MantenimientoController.programar_mantenimiento(
-                id_vehiculo=id_vehiculo,
-                id_tipo=id_tipo,
-                fecha_ultimo=fecha_realizado,
-                km_ultimo=km,
-                observaciones=f"Ejecutado el {fecha_realizado} a los {km:,} km en {taller or 'Taller interno'}."
-            )
+                # 3. Reprogramar próximo servicio automáticamente de forma atómica
+                ok_prog, id_prog, msg_prog = MantenimientoController.programar_mantenimiento(
+                    id_vehiculo=id_vehiculo,
+                    id_tipo=id_tipo,
+                    fecha_ultimo=fecha_realizado,
+                    km_ultimo=km,
+                    observaciones=f"Ejecutado el {fecha_realizado} a los {km:,} km en {taller or 'Taller interno'}.",
+                    conn=conn
+                )
+                if not ok_prog:
+                    raise ValueError(f"Fallo en la reprogramación automática del servicio: {msg_prog}")
 
             return True, id_hist, "Mantenimiento registrado y próximo ciclo reprogramado con éxito."
         except Exception as e:

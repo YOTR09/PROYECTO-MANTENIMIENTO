@@ -72,7 +72,8 @@ class MainWindow(ctk.CTk):
         if usuario is None:
             usuario = AuthController.get_sesion_actual()
             if not usuario:
-                usuario = Usuario(id_usuario=1, id_rol=1, username="admin", nombre_completo="Administrador General", rol_nombre="Administrador")
+                self._mostrar_pantalla_login()
+                return
 
         self.usuario_actual = usuario
         self.login_view.destroy()

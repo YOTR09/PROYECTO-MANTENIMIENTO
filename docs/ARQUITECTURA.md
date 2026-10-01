@@ -19,22 +19,37 @@ graph TD
         V_Prog[ProgramacionMantView]
         V_Tip[TiposMantView]
         V_Hist[HistorialMantView]
+        V_Rep[ReportesView]
+        V_Usr[UsuariosView]
         THEME[theme.py - Estilos y Paleta]
     end
 
-    subgraph Dominio ["Modelos y Tipos de Dominio (models/)"]
+    subgraph Dominio ["Modelos y Tipos de Dominio (src/models/)"]
+        M_Usr[Usuario]
+        M_Veh[Vehiculo]
+        M_Soc[Socio]
+        M_Mant[MantenimientoProgramado]
+        M_Hist[HistorialMantenimiento]
         ENUMS[enums.py - Estados y Constantes]
     end
 
-    subgraph Negocio ["2. Capa de Lógica de Negocio (Services)"]
-        S_Auth[AutenticacionService]
-        S_Veh[VehiculoService]
-        S_Soc[SocioService]
-        S_Tip[TipoMantenimientoService]
-        S_Mant[MantenimientoService]
+    subgraph Controladores ["2. Capa de Controladores y Orquestación (src/controllers/)"]
+        C_Auth[AuthController]
+        C_Usr[UsuarioController]
+        C_Veh[VehiculoController]
+        C_Soc[SocioController]
+        C_Mant[MantenimientoController]
+        C_Rep[ReporteController]
+        S_Sec[SeguridadService - PBKDF2]
     end
 
-    subgraph Datos ["3. Capa de Acceso a Datos (Repositories / DAO)"]
+    subgraph Reportes ["Generación de Documentos (src/reports/)"]
+        REP_PDF[PDFReportGenerator - ReportLab]
+        REP_XLS[ExcelReportGenerator - openpyxl]
+    end
+
+    subgraph Datos ["3. Capa de Acceso a Datos (src/repositories/ y config/)"]
+        R_Usr[UsuarioRepository]
         R_Veh[VehiculoRepository]
         R_Soc[SocioRepository]
         R_Tip[TipoMantenimientoRepository]
@@ -43,28 +58,30 @@ graph TD
     end
 
     MW --> V_Log
-    V_Log --> S_Auth
-    V_Log -.->|Acceso Concedido| MW
-    MW --> V_Dash & V_Veh & V_Soc & V_Prog & V_Tip & V_Hist
-    THEME -.-> V_Dash & V_Veh & V_Soc & V_Prog & V_Tip & V_Hist & MW
-    ENUMS -.-> S_Veh & V_Veh & S_Mant
-    V_Dash --> S_Mant & S_Veh
-    V_Veh --> S_Veh --> R_Veh --> DB
-    V_Soc --> S_Soc --> R_Soc --> DB
-    V_Tip --> S_Tip --> R_Tip --> DB
-    V_Prog --> S_Mant --> R_Mant --> DB
-    V_Hist --> S_Mant --> R_Mant
+    V_Log --> C_Auth --> S_Sec
+    V_Log -.->|Acceso Concedido con Rol| MW
+    MW --> V_Dash & V_Veh & V_Soc & V_Prog & V_Tip & V_Hist & V_Rep & V_Usr
+    THEME -.-> MW & V_Dash & V_Veh & V_Soc & V_Prog & V_Tip & V_Hist & V_Rep & V_Usr
+
+    V_Veh --> C_Veh --> R_Veh --> DB
+    V_Soc --> C_Soc --> R_Soc --> DB
+    V_Prog --> C_Mant --> R_Mant --> DB
+    V_Tip --> C_Mant --> R_Tip --> DB
+    V_Hist --> C_Mant --> R_Mant
+    V_Usr --> C_Usr --> R_Usr --> DB
+    V_Rep --> C_Rep
+    C_Rep --> REP_PDF & REP_XLS
+    REP_PDF & REP_XLS --> R_Veh & R_Soc & R_Mant
 ```
 
 ### Principios de Separación
 
-1. **La Interfaz Visual (`views/`) NUNCA ejecuta sentencias SQL:** Su única función es renderizar elementos en pantalla, capturar eventos de usuario y delegar las acciones a los *Services*.
-2. **Los Servicios (`services/`) concentran las reglas del negocio:** Aquí residen las validaciones de entrada, el cálculo matemático de fechas y kilometrajes, las condiciones de semaforización y la lógica de reprogramación automática.
-3. **Los Repositorios (`repositories/`) aíslan el motor de datos:** Encapsulan todas las consultas SQL (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) y transacciones.
-4. **Configuración Centralizada (`config/database.py`):** Ningún archivo almacena rutas o credenciales duplicadas. Toda la conexión, manejo de claves foráneas y migraciones DDL se gestionan en este punto.
-5. **Modelos y Tipos Compartidos (`src/models/`):** Centraliza las enumeraciones y constantes de estado (`EstadoVehiculo`, `EstadoSocio`, `EstadoMantenimiento`) para eliminar cadenas mágicas y garantizar coherencia entre capas.
-6. **Módulo Centralizado de Estilos (`src/views/theme.py`):** Estandariza la paleta cromática (botones, semáforos, alertas), tipografías, dimensiones y estilos de tablas `ttk.Treeview` en toda la interfaz.
-7. **Servicio de Autenticación Ligero (`src/services/autenticacion_service.py`):** Desacopla la validación de credenciales del diseño visual de `LoginView`. Valida credenciales de administrador directamente en memoria/código para instalaciones locales de un solo administrador.
+1. **La Interfaz Visual (`src/views/`) NUNCA ejecuta sentencias SQL:** Su única función es renderizar componentes gráficos, capturar eventos de usuario y delegar las operaciones a los *Controllers*.
+2. **Los Controladores (`src/controllers/`) orquestan las operaciones y aplican reglas de negocio:** Aquí residen las validaciones de entrada, verificación de unicidad, orquestación transaccional y control de permisos por rol.
+3. **Servicio Criptográfico Centralizado (`src/services/seguridad_service.py`):** Encapsula el algoritmo PBKDF2-HMAC-SHA256 con sal aleatoria, normalización de preguntas de seguridad y comparación en tiempo constante.
+4. **Los Repositorios (`src/repositories/`) aíslan el motor de datos:** Encapsulan todas las consultas SQL (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) de forma parametrizada contra SQLite.
+5. **Configuración y Transaccionalidad (`config/database.py`):** Centraliza la ruta del archivo de base de datos, claves foráneas (`PRAGMA foreign_keys = ON;`), migraciones automáticas y context managers para transacciones atómicas (`get_db_transaction()`).
+6. **Modelos de Dominio Compartidos (`src/models/`):** Entidades POO con propiedades de negocio encapsuladas (ej. `usuario.es_admin`, `usuario.puede_modificar_flota()`).
 
 ---
 
@@ -79,15 +96,34 @@ graph TD
 
 ---
 
-## 3. Modelo de Datos Relacional
+## 3. Modelo de Datos Relacional (7 Entidades Normalizadas en 3FN)
 
 ```mermaid
 erDiagram
+    ROL ||--o{ USUARIO : "asigna"
     SOCIO ||--o{ VEHICULO : "posee"
     VEHICULO ||--o{ MANTENIMIENTO_PROGRAMADO : "tiene"
     TIPO_MANTENIMIENTO ||--o{ MANTENIMIENTO_PROGRAMADO : "define"
     VEHICULO ||--o{ HISTORIAL_MANTENIMIENTO : "registra"
     TIPO_MANTENIMIENTO ||--o{ HISTORIAL_MANTENIMIENTO : "clasifica"
+
+    ROL {
+        int id_rol PK
+        string nombre UK "Administrador / Mecanico / Operador"
+        string descripcion
+    }
+
+    USUARIO {
+        int id_usuario PK
+        int id_rol FK
+        string username UK
+        string password_hash "PBKDF2-HMAC-SHA256"
+        string salt "16 bytes hex"
+        string nombre_completo
+        string pregunta_seguridad
+        string respuesta_seguridad
+        int activo "1=Activo, 0=Inactivo"
+    }
 
     SOCIO {
         int id_socio PK
@@ -95,17 +131,19 @@ erDiagram
         string nombre_completo
         string telefono
         string estado "Activo / Inactivo"
+        int activo "Baja lógica"
     }
 
     VEHICULO {
         int id_vehiculo PK
         int id_socio FK
-        string numero_unidad UK "Ej: Unidad 01, Bus 14"
+        string numero_unidad UK "Ej: Unidad 01"
         string placa UK "Matrícula"
         string marca_modelo "Ej: Encava NT-610"
         int ano
         int kilometraje_actual "Odómetro actual en Km"
         string status "Activo / En Taller / Inactivo"
+        int activo "Baja lógica"
     }
 
     TIPO_MANTENIMIENTO {
@@ -114,6 +152,7 @@ erDiagram
         string descripcion
         int intervalo_km "Frecuencia por kilometraje"
         int intervalo_dias "Frecuencia por tiempo"
+        int activo "Baja lógica"
     }
 
     MANTENIMIENTO_PROGRAMADO {
@@ -125,6 +164,7 @@ erDiagram
         string fecha_proximo_servicio "ISO: YYYY-MM-DD"
         int km_proximo_servicio
         string observaciones
+        int activo "Baja lógica"
     }
 
     HISTORIAL_MANTENIMIENTO {

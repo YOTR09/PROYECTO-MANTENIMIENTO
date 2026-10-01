@@ -31,6 +31,16 @@ class TipoMantenimientoRepository:
             return dict(row) if row else None
 
     @staticmethod
+    def get_by_nombre(nombre, solo_activos=False):
+        with get_db_cursor() as cursor:
+            query = "SELECT * FROM tipo_mantenimiento WHERE LOWER(nombre) = LOWER(?)"
+            if solo_activos:
+                query += " AND activo = 1"
+            cursor.execute(query, (nombre.strip(),))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    @staticmethod
     def create(nombre, descripcion, intervalo_km, intervalo_dias):
         with get_db_cursor(commit=True) as cursor:
             cursor.execute(

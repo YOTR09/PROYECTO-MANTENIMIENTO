@@ -23,7 +23,8 @@ class VehiculoController(BaseController):
         marca_modelo: str,
         ano: Optional[int] = None,
         kilometraje_actual: int = 0,
-        status: str = EstadoVehiculo.ACTIVO.value
+        status: str = EstadoVehiculo.ACTIVO.value,
+        permitir_reactivacion: bool = False
     ) -> Tuple[bool, Optional[Vehiculo], str]:
         if not id_socio:
             return False, None, "Debe seleccionar un socio propietario."
@@ -34,15 +35,7 @@ class VehiculoController(BaseController):
         if not marca_modelo or not marca_modelo.strip():
             return False, None, "La marca/modelo es obligatoria."
 
-        # Validar unicidad entre unidades activas
-        placa_existente = VehiculoRepository.get_by_placa(placa, solo_activos=True)
-        if placa_existente:
-            return False, None, f"Ya existe un vehículo registrado con la placa '{placa.upper().strip()}'."
-
-        unidad_existente = VehiculoRepository.get_by_unidad(numero_unidad, solo_activos=True)
-        if unidad_existente:
-            return False, None, f"El número de unidad '{numero_unidad.strip()}' ya está asignado a otro vehículo."
-
+        km = int(kilometraje_actual) if kilometraje_actual else 0
         try:
             km = int(kilometraje_actual) if kilometraje_actual else 0
             if km < 0:
@@ -59,6 +52,42 @@ class VehiculoController(BaseController):
             except (ValueError, TypeError):
                 return False, None, "El año debe ser un número válido entre 1950 y 2100."
 
+        # Validar unicidad de placa (activa o inactiva)
+        placa_existente = VehiculoRepository.get_by_placa(placa, solo_activos=False)
+        if placa_existente:
+            if placa_existente["activo"] == 1:
+                return False, None, f"Ya existe un vehículo activo registrado con la placa '{placa.upper().strip()}'."
+            if permitir_reactivacion:
+                return VehiculoController.reactivar_vehiculo(
+                    id_vehiculo=placa_existente["id_vehiculo"],
+                    id_socio=id_socio,
+                    numero_unidad=numero_unidad.strip(),
+                    placa=placa.strip().upper(),
+                    marca_modelo=marca_modelo.strip(),
+                    ano=ano_val,
+                    kilometraje_actual=km,
+                    status=status
+                )
+            return False, None, f"EXISTE_INACTIVO:{placa_existente['id_vehiculo']}:{placa_existente['numero_unidad']}"
+
+        # Validar unicidad de número de unidad
+        unidad_existente = VehiculoRepository.get_by_unidad(numero_unidad, solo_activos=False)
+        if unidad_existente:
+            if unidad_existente["activo"] == 1:
+                return False, None, f"El número de unidad '{numero_unidad.strip()}' ya está asignado a otro vehículo activo."
+            if permitir_reactivacion:
+                return VehiculoController.reactivar_vehiculo(
+                    id_vehiculo=unidad_existente["id_vehiculo"],
+                    id_socio=id_socio,
+                    numero_unidad=numero_unidad.strip(),
+                    placa=placa.strip().upper(),
+                    marca_modelo=marca_modelo.strip(),
+                    ano=ano_val,
+                    kilometraje_actual=km,
+                    status=status
+                )
+            return False, None, f"EXISTE_INACTIVO:{unidad_existente['id_vehiculo']}:{unidad_existente['numero_unidad']}"
+
         try:
             nuevo_id = VehiculoRepository.create(
                 id_socio=id_socio,
@@ -73,6 +102,33 @@ class VehiculoController(BaseController):
             return True, vehiculo, "Vehículo registrado exitosamente."
         except Exception as e:
             return False, None, f"Error al registrar la unidad: {str(e)}"
+
+    @staticmethod
+    def reactivar_vehiculo(
+        id_vehiculo: int,
+        id_socio: int,
+        numero_unidad: str,
+        placa: str,
+        marca_modelo: str,
+        ano: Optional[int],
+        kilometraje_actual: int,
+        status: str
+    ) -> Tuple[bool, Optional[Vehiculo], str]:
+        ok, msg = VehiculoController.actualizar_vehiculo(
+            id_vehiculo=id_vehiculo,
+            id_socio=id_socio,
+            numero_unidad=numero_unidad,
+            placa=placa,
+            marca_modelo=marca_modelo,
+            ano=ano,
+            kilometraje_actual=kilometraje_actual,
+            status=status
+        )
+        if not ok:
+            return False, None, msg
+        VehiculoRepository.restore(id_vehiculo)
+        vehiculo = VehiculoController.obtener_vehiculo(id_vehiculo)
+        return True, vehiculo, f"Unidad {numero_unidad} ({placa}) reactivada exitosamente."
 
     @staticmethod
     def actualizar_vehiculo(

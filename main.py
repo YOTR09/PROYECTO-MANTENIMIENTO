@@ -21,7 +21,17 @@ def main():
     try:
         init_db()
     except Exception as e:
-        print(f"Error al inicializar la base de datos: {e}", file=sys.stderr)
+        print(f"Error crítico al inicializar la base de datos: {e}", file=sys.stderr)
+        try:
+            from tkinter import messagebox
+            import tkinter as tk
+            root = tk.Tk()
+            root.withdraw()
+            messagebox.showerror("Error Crítico de Base de Datos", f"No se pudo inicializar la base de datos:\n{e}\n\nEl sistema se cerrará.")
+            root.destroy()
+        except Exception:
+            pass
+        sys.exit(1)
 
     # 2. Iniciar interfaz gráfica de escritorio
     app = MainWindow()

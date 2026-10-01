@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import customtkinter as ctk
-from src.services.vehiculo_service import VehiculoService
-from src.services.socio_service import SocioService
+from src.controllers.vehiculo_controller import VehiculoController
+from src.controllers.socio_controller import SocioController
 from src.models.enums import EstadoVehiculo
 from src.views.theme import (
     BTN_SUCCESS_COLOR,
@@ -204,12 +204,12 @@ class VehiculosView(ctk.CTkFrame):
         self.tree.bind("<<TreeviewSelect>>", self.seleccionar_fila)
 
     def cargar_socios(self):
-        socios = SocioService.listar_socios()
+        socios = SocioController.listar_socios(solo_activos=True)
         self.dict_socios.clear()
         opciones = []
         for s in socios:
-            etiqueta = f"{s['nombre_completo']} ({s['cedula']})"
-            self.dict_socios[etiqueta] = s["id_socio"]
+            etiqueta = f"{s.nombre_completo} ({s.cedula})"
+            self.dict_socios[etiqueta] = s.id_socio
             opciones.append(etiqueta)
 
         if opciones:
@@ -225,18 +225,18 @@ class VehiculosView(ctk.CTkFrame):
 
         termino = self.entry_buscar.get()
         status_filtro = self.filtro_status.get()
-        vehiculos = VehiculoService.listar_vehiculos(termino, status_filtro)
+        vehiculos = VehiculoController.listar_vehiculos(search_term=termino, status_filter=status_filtro, solo_activos=True)
 
         for v in vehiculos:
             self.tree.insert("", "end", values=(
-                v["id_vehiculo"],
-                v["numero_unidad"],
-                v["placa"],
-                v["marca_modelo"],
-                v["ano"] or "-",
-                f"{v['kilometraje_actual']:,} km",
-                v["status"],
-                v["socio_nombre"]
+                v.id_vehiculo,
+                v.numero_unidad,
+                v.placa,
+                v.marca_modelo,
+                v.ano or "-",
+                f"{v.kilometraje_actual:,} km",
+                v.status,
+                v.socio_nombre
             ))
 
     def seleccionar_fila(self, event):
@@ -269,21 +269,48 @@ class VehiculosView(ctk.CTkFrame):
             messagebox.showerror("Error", "Debe seleccionar un socio propietario válido.")
             return
 
-        try:
-            VehiculoService.registrar_vehiculo(
-                id_socio=id_socio,
-                numero_unidad=self.var_unidad.get(),
-                placa=self.var_placa.get(),
-                marca_modelo=self.var_marca.get(),
-                ano=self.var_ano.get() if self.var_ano.get().strip() else None,
-                kilometraje_actual=self.var_km.get(),
-                status=self.var_status.get()
-            )
-            messagebox.showinfo("Éxito", "Unidad registrada correctamente.")
+        ok, res, msg = VehiculoController.registrar_vehiculo(
+            id_socio=id_socio,
+            numero_unidad=self.var_unidad.get(),
+            placa=self.var_placa.get(),
+            marca_modelo=self.var_marca.get(),
+            ano=self.var_ano.get() if self.var_ano.get().strip() else None,
+            kilometraje_actual=self.var_km.get(),
+            status=self.var_status.get()
+        )
+
+        if not ok and msg.startswith("EXISTE_INACTIVO:"):
+            partes = msg.split(":")
+            id_inactivo = int(partes[1])
+            unidad_inactiva = partes[2]
+            if messagebox.askyesno(
+                "Unidad Inactiva Encontrada",
+                f"La placa o número de unidad pertenece a una unidad dada de baja anteriormente (Unidad {unidad_inactiva}).\n\n¿Desea reactivarla con los datos ingresados?"
+            ):
+                ok_r, res_r, msg_r = VehiculoController.reactivar_vehiculo(
+                    id_vehiculo=id_inactivo,
+                    id_socio=id_socio,
+                    numero_unidad=self.var_unidad.get(),
+                    placa=self.var_placa.get(),
+                    marca_modelo=self.var_marca.get(),
+                    ano=int(self.var_ano.get()) if self.var_ano.get().strip() else None,
+                    kilometraje_actual=int(self.var_km.get()) if self.var_km.get().strip() else 0,
+                    status=self.var_status.get()
+                )
+                if ok_r:
+                    messagebox.showinfo("Éxito", msg_r)
+                    self.limpiar_formulario()
+                    self.cargar_datos()
+                else:
+                    messagebox.showerror("Error", msg_r)
+            return
+
+        if ok:
+            messagebox.showinfo("Éxito", msg)
             self.limpiar_formulario()
             self.cargar_datos()
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+        else:
+            messagebox.showwarning("Atención", msg)
 
     def actualizar(self):
         if not self.vehiculo_seleccionado_id:
@@ -296,22 +323,22 @@ class VehiculosView(ctk.CTkFrame):
             messagebox.showerror("Error", "Seleccione un socio válido.")
             return
 
-        try:
-            VehiculoService.actualizar_vehiculo(
-                id_vehiculo=self.vehiculo_seleccionado_id,
-                id_socio=id_socio,
-                numero_unidad=self.var_unidad.get(),
-                placa=self.var_placa.get(),
-                marca_modelo=self.var_marca.get(),
-                ano=self.var_ano.get() if self.var_ano.get().strip() else None,
-                kilometraje_actual=self.var_km.get(),
-                status=self.var_status.get()
-            )
-            messagebox.showinfo("Éxito", "Datos de la unidad actualizados.")
+        ok, msg = VehiculoController.actualizar_vehiculo(
+            id_vehiculo=self.vehiculo_seleccionado_id,
+            id_socio=id_socio,
+            numero_unidad=self.var_unidad.get(),
+            placa=self.var_placa.get(),
+            marca_modelo=self.var_marca.get(),
+            ano=self.var_ano.get() if self.var_ano.get().strip() else None,
+            kilometraje_actual=self.var_km.get(),
+            status=self.var_status.get()
+        )
+        if ok:
+            messagebox.showinfo("Éxito", msg)
             self.limpiar_formulario()
             self.cargar_datos()
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+        else:
+            messagebox.showwarning("Atención", msg)
 
     def actualizar_solo_odometro(self):
         if not self.vehiculo_seleccionado_id:
@@ -324,27 +351,27 @@ class VehiculosView(ctk.CTkFrame):
         )
         nuevo_km_str = dialogo.get_input()
         if nuevo_km_str is not None and nuevo_km_str.strip():
-            try:
-                VehiculoService.actualizar_kilometraje(self.vehiculo_seleccionado_id, nuevo_km_str.strip())
-                messagebox.showinfo("Éxito", "Odómetro actualizado. Los estados de mantenimiento preventivo se han recalculado.")
+            ok, msg = VehiculoController.actualizar_kilometraje(self.vehiculo_seleccionado_id, nuevo_km_str.strip())
+            if ok:
+                messagebox.showinfo("Éxito", msg)
                 self.limpiar_formulario()
                 self.cargar_datos()
-            except Exception as e:
-                messagebox.showerror("Error", str(e))
+            else:
+                messagebox.showwarning("Atención", msg)
 
     def eliminar(self):
         if not self.vehiculo_seleccionado_id:
             messagebox.showwarning("Atención", "Seleccione una unidad para eliminar.")
             return
 
-        if messagebox.askyesno("Confirmar", f"¿Está seguro de eliminar la Unidad {self.var_unidad.get()} ({self.var_placa.get()})? Se eliminará también su plan de mantenimientos."):
-            try:
-                VehiculoService.eliminar_vehiculo(self.vehiculo_seleccionado_id)
-                messagebox.showinfo("Éxito", "Unidad eliminada.")
+        if messagebox.askyesno("Confirmar", f"¿Está seguro de dar de baja la Unidad {self.var_unidad.get()} ({self.var_placa.get()})?"):
+            ok, msg = VehiculoController.eliminar_vehiculo(self.vehiculo_seleccionado_id, logico=True)
+            if ok:
+                messagebox.showinfo("Éxito", msg)
                 self.limpiar_formulario()
                 self.cargar_datos()
-            except Exception as e:
-                messagebox.showerror("Error", str(e))
+            else:
+                messagebox.showwarning("Atención", msg)
 
     def limpiar_formulario(self):
         self.vehiculo_seleccionado_id = None

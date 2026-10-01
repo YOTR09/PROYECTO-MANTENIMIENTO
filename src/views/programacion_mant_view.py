@@ -2,9 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import customtkinter as ctk
 from datetime import date
-from src.services.mantenimiento_service import MantenimientoService
-from src.services.vehiculo_service import VehiculoService
-from src.services.tipo_mantenimiento_service import TipoMantenimientoService
+from src.controllers.mantenimiento_controller import MantenimientoController
+from src.controllers.vehiculo_controller import VehiculoController
 from src.views.theme import (
     BTN_SUCCESS_COLOR,
     BTN_SUCCESS_HOVER,
@@ -174,31 +173,32 @@ class ProgramacionMantView(ctk.CTkFrame):
 
         termino = self.entry_buscar.get()
         estado_filtro = self.filtro_estado.get()
-        programaciones = MantenimientoService.listar_programaciones(
+        programaciones = MantenimientoController.listar_programaciones(
             search_term=termino,
-            estado_filtro=estado_filtro
+            estado_filtro=estado_filtro,
+            solo_activos=True
         )
 
         for p in programaciones:
             tag = "al_dia"
-            if p["estado"] == "Vencido":
+            if p.estado_alerta == "Vencido":
                 tag = "vencido"
-            elif p["estado"] == "Por Vencer":
+            elif p.estado_alerta == "Por Vencer":
                 tag = "por_vencer"
 
-            prox_km_txt = f"{p['km_proximo_servicio']:,} km" if p["km_proximo_servicio"] > 0 else "N/A"
-            prox_fecha_txt = p["fecha_proximo_servicio"] or "N/A"
+            prox_km_txt = f"{p.km_proximo_servicio:,} km" if p.km_proximo_servicio > 0 else "N/A"
+            prox_fecha_txt = p.fecha_proximo_servicio or "N/A"
 
             self.tree.insert("", "end", values=(
-                p["id_programacion"],
-                p["numero_unidad"],
-                p["placa"],
-                p["tipo_nombre"],
-                f"{p['kilometraje_actual']:,} km",
+                p.id_programacion,
+                p.numero_unidad,
+                p.placa,
+                p.tipo_nombre,
+                f"{p.kilometraje_actual:,} km",
                 prox_km_txt,
                 prox_fecha_txt,
-                p["badge"],
-                p["resumen_alerta"]
+                p.badge_alerta,
+                p.observaciones or "Al día"
             ), tags=(tag,))
 
     def seleccionar_fila(self, event):
@@ -222,26 +222,26 @@ class ProgramacionMantView(ctk.CTkFrame):
         ).pack(pady=(15, 10))
 
         # 1. Selector de Vehículo
-        vehiculos = VehiculoService.listar_vehiculos()
+        vehiculos = VehiculoController.listar_vehiculos(solo_activos=True)
         if not vehiculos:
             messagebox.showwarning("Atención", "No hay unidades registradas en el sistema. Registre un vehículo primero.")
             modal.destroy()
             return
 
-        dict_veh = {f"Unidad {v['numero_unidad']} - {v['placa']} ({v['marca_modelo']})": v for v in vehiculos}
+        dict_veh = {f"Unidad {v.numero_unidad} - {v.placa} ({v.marca_modelo})": v for v in vehiculos}
         ctk.CTkLabel(modal, text="Seleccionar Unidad / Vehículo:", anchor="w").pack(fill="x", padx=30, pady=(5, 0))
         var_veh = ctk.StringVar(value=list(dict_veh.keys())[0])
         combo_veh = ctk.CTkComboBox(modal, values=list(dict_veh.keys()), variable=var_veh, state="readonly")
         combo_veh.pack(fill="x", padx=30, pady=(0, 10))
 
         # 2. Selector de Rutina
-        tipos = TipoMantenimientoService.listar_tipos()
+        tipos = MantenimientoController.listar_tipos(solo_activos=True)
         if not tipos:
             messagebox.showwarning("Atención", "No hay tipos de mantenimiento en el catálogo.")
             modal.destroy()
             return
 
-        dict_tipos = {f"{t['nombre']} (Cada {t['intervalo_km']} km / {t['intervalo_dias']} d)": t["id_tipo"] for t in tipos}
+        dict_tipos = {f"{t.nombre} (Cada {t.intervalo_km} km / {t.intervalo_dias} d)": t.id_tipo for t in tipos}
         ctk.CTkLabel(modal, text="Seleccionar Rutina Preventiva:", anchor="w").pack(fill="x", padx=30, pady=(5, 0))
         var_tipo = ctk.StringVar(value=list(dict_tipos.keys())[0])
         combo_tipo = ctk.CTkComboBox(modal, values=list(dict_tipos.keys()), variable=var_tipo, state="readonly")
@@ -269,7 +269,7 @@ class ProgramacionMantView(ctk.CTkFrame):
         def on_veh_change(choice):
             v_obj = dict_veh.get(choice)
             if v_obj:
-                var_km_ult.set(str(v_obj["kilometraje_actual"]))
+                var_km_ult.set(str(v_obj.kilometraje_actual))
         combo_veh.configure(command=on_veh_change)
 
         # Observaciones
@@ -280,19 +280,19 @@ class ProgramacionMantView(ctk.CTkFrame):
         def guardar_prog():
             v_obj = dict_veh[var_veh.get()]
             id_tipo = dict_tipos[var_tipo.get()]
-            try:
-                MantenimientoService.programar_mantenimiento(
-                    id_vehiculo=v_obj["id_vehiculo"],
-                    id_tipo=id_tipo,
-                    fecha_ultimo=var_fecha_ult.get().strip(),
-                    km_ultimo=var_km_ult.get().strip(),
-                    observaciones=entry_obs.get().strip()
-                )
+            ok, id_prog, msg = MantenimientoController.programar_mantenimiento(
+                id_vehiculo=v_obj.id_vehiculo,
+                id_tipo=id_tipo,
+                fecha_ultimo=var_fecha_ult.get().strip(),
+                km_ultimo=var_km_ult.get().strip(),
+                observaciones=entry_obs.get().strip()
+            )
+            if ok:
                 messagebox.showinfo("Éxito", "Rutina programada correctamente. Próximos servicios y semáforo calculados.")
                 modal.destroy()
                 self.cargar_datos()
-            except Exception as e:
-                messagebox.showerror("Error", str(e))
+            else:
+                messagebox.showerror("Error", msg)
 
         ctk.CTkButton(modal, text="Guardar Programación", fg_color=BTN_SUCCESS_COLOR, hover_color=BTN_SUCCESS_HOVER, command=guardar_prog).pack(fill="x", padx=30, pady=10)
 
@@ -310,9 +310,8 @@ class ProgramacionMantView(ctk.CTkFrame):
         rutina = valores[3]
         km_actual_str = str(valores[4]).replace(" km", "").replace(",", "")
 
-        # Obtener detalle de la programación
-        from src.repositories.mantenimiento_repository import MantenimientoRepository
-        prog_data = MantenimientoRepository.get_programacion_by_id(id_prog)
+        # Obtener detalle de la programación a través del Controlador
+        prog_data = MantenimientoController.obtener_programacion(id_prog)
         if not prog_data:
             messagebox.showerror("Error", "No se encontró el registro seleccionado.")
             return
@@ -374,16 +373,16 @@ class ProgramacionMantView(ctk.CTkFrame):
         text_desc.pack(fill="x", padx=30, pady=(0, 15))
 
         def confirmar_ejecucion():
-            try:
-                MantenimientoService.registrar_mantenimiento_realizado(
-                    id_vehiculo=prog_data["id_vehiculo"],
-                    id_tipo=prog_data["id_tipo"],
-                    fecha_realizado=var_fecha_real.get().strip(),
-                    km_al_momento=var_km_real.get().strip(),
-                    costo=var_costo.get().strip(),
-                    taller=var_taller.get().strip(),
-                    descripcion=text_desc.get("1.0", tk.END).strip()
-                )
+            ok, id_hist, msg = MantenimientoController.registrar_servicio_realizado(
+                id_vehiculo=prog_data.id_vehiculo,
+                id_tipo=prog_data.id_tipo,
+                fecha_realizado=var_fecha_real.get().strip(),
+                km_al_momento=var_km_real.get().strip(),
+                costo=var_costo.get().strip(),
+                taller=var_taller.get().strip(),
+                descripcion=text_desc.get("1.0", tk.END).strip()
+            )
+            if ok:
                 messagebox.showinfo(
                     "Éxito", 
                     f"¡Mantenimiento guardado en el historial con éxito!\n\n"
@@ -391,8 +390,8 @@ class ProgramacionMantView(ctk.CTkFrame):
                 )
                 modal.destroy()
                 self.cargar_datos()
-            except Exception as e:
-                messagebox.showerror("Error", str(e))
+            else:
+                messagebox.showerror("Error", msg)
 
         ctk.CTkButton(
             modal,
@@ -408,10 +407,10 @@ class ProgramacionMantView(ctk.CTkFrame):
             return
 
         if messagebox.askyesno("Confirmar", "¿Desea quitar esta rutina preventiva para la unidad seleccionada? El historial pasado se conservará."):
-            try:
-                MantenimientoService.eliminar_programacion(self.item_seleccionado_id)
-                messagebox.showinfo("Éxito", "Programación eliminada.")
+            ok, msg = MantenimientoController.eliminar_programacion(self.item_seleccionado_id, logico=True)
+            if ok:
+                messagebox.showinfo("Éxito", msg)
                 self.item_seleccionado_id = None
                 self.cargar_datos()
-            except Exception as e:
-                messagebox.showerror("Error", str(e))
+            else:
+                messagebox.showerror("Error", msg)

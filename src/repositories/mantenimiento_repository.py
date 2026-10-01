@@ -70,8 +70,8 @@ class MantenimientoRepository:
             return dict(row) if row else None
 
     @staticmethod
-    def upsert_programacion(id_vehiculo, id_tipo, fecha_ultimo, km_ultimo, fecha_proximo, km_proximo, observaciones=""):
-        with get_db_cursor(commit=True) as cursor:
+    def upsert_programacion(id_vehiculo, id_tipo, fecha_ultimo, km_ultimo, fecha_proximo, km_proximo, observaciones="", conn=None):
+        with get_db_cursor(commit=True, conn=conn) as cursor:
             cursor.execute(
                 "SELECT id_programacion FROM mantenimiento_programado WHERE id_vehiculo = ? AND id_tipo = ?",
                 (id_vehiculo, id_tipo)
@@ -115,8 +115,8 @@ class MantenimientoRepository:
             return cursor.rowcount > 0
 
     @staticmethod
-    def add_historial(id_vehiculo, id_tipo, fecha_realizado, km_al_momento, costo, taller_mecanico, descripcion_trabajo):
-        with get_db_cursor(commit=True) as cursor:
+    def add_historial(id_vehiculo, id_tipo, fecha_realizado, km_al_momento, costo, taller_mecanico, descripcion_trabajo, conn=None):
+        with get_db_cursor(commit=True, conn=conn) as cursor:
             cursor.execute(
                 """
                 INSERT INTO historial_mantenimiento

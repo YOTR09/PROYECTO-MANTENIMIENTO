@@ -109,12 +109,53 @@ class TestSistemaIntegral(unittest.TestCase):
         self.assertIsNotNone(v_en_bd)
         self.assertEqual(v_en_bd.activo, 0, "El campo activo debe ser 0 en la BD")
 
+        # Probar re-registro de vehículo inactivo: debe retornar señal EXISTE_INACTIVO
+        ok_re, v_re, msg_re = VehiculoController.registrar_vehiculo(
+            id_socio=id_socio,
+            numero_unidad="99",
+            placa="AB999CD",
+            marca_modelo="Yutong Modificado",
+            ano=2017,
+            kilometraje_actual=85000
+        )
+        self.assertFalse(ok_re)
+        self.assertTrue(msg_re.startswith("EXISTE_INACTIVO:"))
+
+        # Reactivar el vehículo
+        ok_react, v_react, msg_react = VehiculoController.reactivar_vehiculo(
+            id_vehiculo=id_veh,
+            id_socio=id_socio,
+            numero_unidad="99",
+            placa="AB999CD",
+            marca_modelo="Yutong Modificado",
+            ano=2017,
+            kilometraje_actual=85000,
+            status="Activo"
+        )
+        self.assertTrue(ok_react)
+        self.assertEqual(v_react.activo, 1)
+        self.assertEqual(v_react.marca_modelo, "Yutong Modificado")
+
+        # Volver a dar de baja para probar baja de socio
+        VehiculoController.eliminar_vehiculo(id_veh, logico=True)
+
         # Ahora el socio ya no tiene vehículos activos, se puede dar de baja lógica
         ok, msg = SocioController.eliminar_socio(id_socio, logico=True)
         self.assertTrue(ok)
 
         activos_s_post = SocioController.listar_socios(solo_activos=True)
         self.assertFalse(any(s.id_socio == id_socio for s in activos_s_post))
+
+        # Probar re-registro de socio inactivo
+        ok_s_re, _, msg_s_re = SocioController.registrar_socio("V-88888888", "Socio Prueba SoftDelete", "0412-1112233")
+        self.assertFalse(ok_s_re)
+        self.assertTrue(msg_s_re.startswith("EXISTE_INACTIVO:"))
+
+        # Reactivar socio
+        ok_s_react, s_react, _ = SocioController.reactivar_socio(id_socio, "V-88888888", "Socio Reactivado", "0412-9999999")
+        self.assertTrue(ok_s_react)
+        self.assertEqual(s_react.activo, 1)
+        self.assertEqual(s_react.nombre_completo, "Socio Reactivado")
 
     # 3. PRUEBAS DE CONTROLADOR DE USUARIOS
     def test_gestion_usuarios_controller(self):

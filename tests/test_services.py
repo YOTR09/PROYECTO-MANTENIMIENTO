@@ -14,10 +14,14 @@ from src.services.autenticacion_service import AutenticacionService
 
 
 class TestAutenticacion(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        init_db()
+
     def test_credenciales_administrador(self):
-        self.assertTrue(AutenticacionService.validar_credenciales("admin123", "adminx123"))
-        self.assertFalse(AutenticacionService.validar_credenciales("otro", "adminx123"))
-        self.assertFalse(AutenticacionService.validar_credenciales("admin123", "incorrecta"))
+        self.assertTrue(AutenticacionService.validar_credenciales("admin", "admin123"))
+        self.assertFalse(AutenticacionService.validar_credenciales("otro", "admin123"))
+        self.assertFalse(AutenticacionService.validar_credenciales("admin", "incorrecta"))
 
 class TestSistemaMantenimiento(unittest.TestCase):
     @classmethod

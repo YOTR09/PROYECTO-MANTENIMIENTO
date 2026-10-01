@@ -1,3 +1,4 @@
+import os
 from src.controllers.base_controller import BaseController
 from src.repositories.usuario_repository import UsuarioRepository
 from src.services.seguridad_service import SeguridadService
@@ -53,7 +54,7 @@ class AuthController(BaseController):
         "¿Pregunta personalizada?"
     ]
 
-    CLAVE_MAESTRA_EMERGENCIA = "BRISAS-MASTER-2026"
+    CLAVE_MAESTRA_EMERGENCIA = os.environ.get("BRISAS_MASTER_KEY", "BRISAS-MASTER-2026")
 
     @classmethod
     def cambiar_contrasena(cls, id_usuario: int, actual: str, nueva: str) -> Tuple[bool, str]:

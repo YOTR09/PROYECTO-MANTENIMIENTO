@@ -1,10 +1,17 @@
 import os
+import html
 from datetime import datetime
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from typing import List, Dict, Any
+
+def _safe_str(val: Any) -> str:
+    """Escapa caracteres especiales XML/HTML para inserción segura en Paragraphs."""
+    if val is None:
+        return ""
+    return html.escape(str(val))
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo_empresa_light.png")
@@ -47,7 +54,7 @@ def _crear_encabezado_pdf(elementos, titulo_reporte: str, subtitulo: str = ""):
     )
 
     ahora_str = datetime.now().strftime("%d/%m/%Y %H:%M")
-    texto_centro = f"<b>{titulo_reporte}</b><br/><font size=8>{subtitulo}</font>"
+    texto_centro = f"<b>{_safe_str(titulo_reporte)}</b><br/><font size=8>{_safe_str(subtitulo)}</font>"
     texto_derecha = f"<b>Empresa:</b> Brisas del Palmar<br/><b>Emisión:</b> {ahora_str}<br/><b>Sistema:</b> Control de Flota"
 
     col1 = logo_img if logo_img else Paragraph("<b>BRISAS DEL PALMAR</b>", style_title)

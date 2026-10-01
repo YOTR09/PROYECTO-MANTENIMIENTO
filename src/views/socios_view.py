@@ -184,6 +184,30 @@ class SociosView(ctk.CTkFrame):
             telefono=self.var_telefono.get(),
             estado=self.var_estado.get()
         )
+
+        if not ok and msg.startswith("EXISTE_INACTIVO:"):
+            partes = msg.split(":")
+            id_inactivo = int(partes[1])
+            nombre_inactivo = partes[2]
+            if messagebox.askyesno(
+                "Socio Inactivo Encontrado",
+                f"La cédula ingresada pertenece a un socio dado de baja anteriormente ({nombre_inactivo}).\n\n¿Desea reactivarlo con los datos actuales?"
+            ):
+                ok_r, socio_r, msg_r = SocioController.reactivar_socio(
+                    id_socio=id_inactivo,
+                    cedula=self.var_cedula.get(),
+                    nombre_completo=self.var_nombre.get(),
+                    telefono=self.var_telefono.get(),
+                    estado=self.var_estado.get()
+                )
+                if ok_r:
+                    messagebox.showinfo("Éxito", msg_r)
+                    self.limpiar_formulario()
+                    self.cargar_datos()
+                else:
+                    messagebox.showerror("Error", msg_r)
+            return
+
         if ok:
             messagebox.showinfo("Éxito", msg)
             self.limpiar_formulario()

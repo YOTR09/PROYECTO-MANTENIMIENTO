@@ -101,8 +101,8 @@ class VehiculoRepository:
             return cursor.rowcount > 0
 
     @staticmethod
-    def update_kilometraje(id_vehiculo, nuevo_km):
-        with get_db_cursor(commit=True) as cursor:
+    def update_kilometraje(id_vehiculo, nuevo_km, conn=None):
+        with get_db_cursor(commit=True, conn=conn) as cursor:
             cursor.execute(
                 "UPDATE vehiculo SET kilometraje_actual = ? WHERE id_vehiculo = ?",
                 (nuevo_km, id_vehiculo)

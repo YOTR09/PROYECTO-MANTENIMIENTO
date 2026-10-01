@@ -78,20 +78,22 @@ venv/bin/python main.py
 
 ### Módulo 0: Acceso al Sistema (Inicio de Sesión)
 
-Al ejecutar la aplicación, lo primero que se mostrará es la pantalla de autenticación con dimensiones compactas (`520x540`):
+Al ejecutar la aplicación, lo primero que se mostrará es la pantalla de autenticación con dimensiones compactas (`520x620`):
 
-1. **Credenciales predeterminadas de administrador:**
-   - **Usuario:** `admin123`
-   - **Contraseña:** `adminx123`
-2. Puedes pulsar el botón **"Iniciar sesión"** o presionar la tecla **Enter** desde cualquiera de los dos campos de texto.
-3. Si los datos no coinciden, se mostrará el aviso en rojo *"Usuario o contraseña incorrectos"*.
-4. Al ingresar correctamente, la ventana se expande al tamaño operativo (`1240x760`) y carga el panel principal.
+1. **Credenciales predeterminadas por perfil:**
+   - **Administrador:** `admin` / `admin123` (Acceso total al sistema)
+   - **Mecánico:** `mecanico` / `mecanico123` (Gestión operativa de flota y taller)
+   - **Operador / Auditor:** `auditor` / `auditor123` (Consulta de KPIs y emisión de reportes)
+2. Puedes pulsar el botón **"Iniciar Sesión"** o presionar la tecla **Enter** desde cualquiera de los dos campos de texto.
+3. Si los datos no coinciden o la cuenta está inactiva, se mostrará el aviso en rojo.
+4. Si olvidaste tu contraseña, haz clic en **"¿Olvidaste tu contraseña?"** para restablecerla mediante tu pregunta de seguridad o la clave maestra.
+5. Al ingresar correctamente, la ventana se expande al tamaño operativo (`1280x800`) y carga el panel principal.
 
 ---
 
 ### Módulos Principales de Gestión
 
-Una vez iniciada la sesión, la ventana principal cuenta con una **barra lateral izquierda (Sidebar)** que te permite cambiar entre los distintos módulos con un solo clic.
+Una vez iniciada la sesión, la ventana principal cuenta con una **barra lateral izquierda (Sidebar)** que te permite cambiar entre los distintos módulos con un solo clic:
 
 ```text
 [ Barra Lateral ]           [ Área de Trabajo Principal ]
@@ -101,6 +103,8 @@ Una vez iniciada la sesión, la ventana principal cuenta con una **barra lateral
 - 🛠️ Control Preventivo     -> Programación de servicios y registro de hechos
 - 📋 Catálogo Rutinas       -> CRUD para crear/editar rutinas preventivas
 - 📜 Bitácora Histórica     -> Historial de gastos, talleres y mantenimientos
+- 📑 Centro de Reportes     -> Emisión de reportes oficiales en PDF y Excel
+- ⚙️ Control de Usuarios     -> Gestión de cuentas, roles y seguridad (Solo Admin)
 ```
 
 ---
@@ -206,7 +210,28 @@ Es el panel central de control de la empresa:
 
 ---
 
-### Módulo 7: Cambio de Modo Visual (Oscuro / Claro)
+### Módulo 7: Centro de Reportes Oficiales (`📑 Reportes`)
+
+Permite exportar informes con calidad ejecutiva para auditorías, directiva y control de costos:
+- **Reporte 1 (PDF):** Ficha Técnica y Estado General de la Flota Vehicular.
+- **Reporte 2 (PDF):** Plan de Mantenimiento Preventivo y Alertas Semaforizadas (🔴, 🟡, 🟢).
+- **Reporte 3 (Excel):** Bitácora Histórica de Mantenimiento y Costos con Fórmulas Automáticas (`=SUM(...)`).
+- **Reporte 4 (PDF):** Directorio Institucional de Socios y Unidades Asignadas.
+- **Reporte 5 (Excel):** Resumen Ejecutivo y Métricas de Rendimiento por Taller Mecánico.
+
+Para emitir un reporte, haz clic en **"Generar Reporte"**, elige la carpeta de destino y el archivo se generará al instante.
+
+---
+
+### Módulo 8: Control de Usuarios y Seguridad (`⚙️ Usuarios`) *(Exclusivo Administrador)*
+
+- **Alta de Usuarios:** Permite crear nuevos operadores y mecánicos asignando rol, contraseña inicial y pregunta secreta de recuperación.
+- **Baja Lógica / Reactivación:** Desactiva cuentas sin eliminar su trazabilidad en el sistema. Los usuarios desactivados pueden reactivarse con un clic.
+- **Restablecimiento Forzado:** El Administrador puede cambiar la contraseña de cualquier usuario en caso de olvido.
+
+---
+
+### Módulo 9: Cambio de Modo Visual (Oscuro / Claro)
 
 - En la parte inferior de la barra lateral izquierda encontrarás el selector de tema:
   - **Dark:** Ideal para trabajo nocturno o reducir fatiga visual.
@@ -233,23 +258,25 @@ Respaldar toda la información de Brisas del Palmar es sumamente sencillo:
 
 ## 🧪 Ejecución de Pruebas Unitarias
 
-El proyecto incluye pruebas automatizadas para verificar la autenticación, la integridad de los servicios y el cálculo de alertas preventivas. Para ejecutarlas:
+El proyecto incluye una suite integral de 11 pruebas automatizadas para verificar autenticación criptográfica, persistencia, roles, transaccionalidad y generación de reportes:
 
 ```bash
-python -m unittest discover tests
+./venv/bin/python -m unittest discover tests -v
 ```
 
 Salida esperada:
 
 ```text
-...
-----------------------------------------------------------------------
-Ran 3 tests in 0.064s
+Ran 11 tests in 1.15s
 
 OK
 ```
 
-Las 3 pruebas cubren:
-1. `TestAutenticacion`: Validación de credenciales de administrador y rechazo de accesos no autorizados.
-2. `test_flujo_socio_y_vehiculo`: Integridad referencial de socios y vehículos, unicidad de cédula/placa/unidad y protección contra eliminación.
-3. `test_programacion_mantenimiento_y_alertas`: Motor de semáforo preventivo (Al Día, Por Vencer, Vencido), actualización de odómetro y recálculo automático de próximos servicios.
+Las pruebas cubren:
+1. `test_hashing_seguro_pbkdf2`: Generación de sal única de 16 bytes y verificación de hashes en tiempo constante.
+2. `test_autenticacion_3_niveles`: Control de permisos y accesos para Administrador, Mecánico y Operador.
+3. `test_eliminacion_logica_socio_y_vehiculo`: Bajas lógicas (*Soft Delete*), preservación de integridad y reactivación interactiva.
+4. `test_gestion_usuarios_controller`: Registro, baja y bloqueo de login para cuentas inactivas.
+5. `test_generacion_cinco_reportes`: Generación íntegra de los 5 archivos en PDF y Excel verificando cabeceras y estructura de bytes.
+6. `test_recuperacion_por_pregunta_secreta` y `test_recuperacion_por_clave_maestra`: Restablecimiento de accesos seguro.
+7. `test_programacion_mantenimiento_y_alertas`: Motor de semáforos preventivos y reprogramación automática por odómetro.

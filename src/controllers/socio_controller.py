@@ -16,15 +16,25 @@ class SocioController(BaseController):
         return Socio.from_dict(fila) if fila else None
 
     @staticmethod
-    def registrar_socio(cedula: str, nombre_completo: str, telefono: str = "", estado: str = "Activo") -> Tuple[bool, Optional[Socio], str]:
+    def registrar_socio(cedula: str, nombre_completo: str, telefono: str = "", estado: str = "Activo", permitir_reactivacion: bool = False) -> Tuple[bool, Optional[Socio], str]:
         if not cedula or not cedula.strip():
             return False, None, "La cédula o documento de identidad es obligatorio."
         if not nombre_completo or not nombre_completo.strip():
             return False, None, "El nombre completo del socio es obligatorio."
 
-        existente = SocioRepository.get_by_cedula(cedula, solo_activos=True)
+        existente = SocioRepository.get_by_cedula(cedula, solo_activos=False)
         if existente:
-            return False, None, f"Ya existe un socio registrado con la cédula '{cedula.strip()}'."
+            if existente["activo"] == 1:
+                return False, None, f"Ya existe un socio activo registrado con la cédula '{cedula.strip()}'."
+            if permitir_reactivacion:
+                return SocioController.reactivar_socio(
+                    id_socio=existente["id_socio"],
+                    cedula=cedula.strip(),
+                    nombre_completo=nombre_completo.strip(),
+                    telefono=telefono.strip() if telefono else "",
+                    estado=estado
+                )
+            return False, None, f"EXISTE_INACTIVO:{existente['id_socio']}:{existente['nombre_completo']}"
 
         try:
             nuevo_id = SocioRepository.create(
@@ -37,6 +47,15 @@ class SocioController(BaseController):
             return True, socio, "Socio registrado exitosamente."
         except Exception as e:
             return False, None, f"Error al registrar el socio: {str(e)}"
+
+    @staticmethod
+    def reactivar_socio(id_socio: int, cedula: str, nombre_completo: str, telefono: str = "", estado: str = "Activo") -> Tuple[bool, Optional[Socio], str]:
+        ok, msg = SocioController.actualizar_socio(id_socio, cedula, nombre_completo, telefono, estado)
+        if not ok:
+            return False, None, msg
+        SocioRepository.restore(id_socio)
+        socio = SocioController.obtener_socio(id_socio)
+        return True, socio, f"Socio '{nombre_completo}' ({cedula}) reactivado exitosamente."
 
     @staticmethod
     def actualizar_socio(id_socio: int, cedula: str, nombre_completo: str, telefono: str = "", estado: str = "Activo") -> Tuple[bool, str]:

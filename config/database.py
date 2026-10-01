@@ -32,14 +32,33 @@ def get_db_connection():
     return conn
 
 @contextmanager
-def get_db_cursor(commit=False):
-    """Context manager para ejecutar sentencias de forma segura"""
-    conn = get_db_connection()
+def get_db_cursor(commit=False, conn=None):
+    """Context manager para ejecutar sentencias de forma segura. Si se pasa conn, se reutiliza."""
+    should_close = False
+    if conn is None:
+        conn = get_db_connection()
+        should_close = True
     cursor = conn.cursor()
     try:
         yield cursor
-        if commit:
+        if commit and should_close:
             conn.commit()
+    except Exception as e:
+        if should_close:
+            conn.rollback()
+        raise e
+    finally:
+        if should_close:
+            conn.close()
+
+@contextmanager
+def get_db_transaction():
+    """Context manager para ejecutar múltiples operaciones dentro de una transacción atómica unificada."""
+    conn = get_db_connection()
+    try:
+        conn.execute("BEGIN IMMEDIATE;")
+        yield conn
+        conn.commit()
     except Exception as e:
         conn.rollback()
         raise e
