@@ -10,6 +10,8 @@ class UsuarioRepository:
                     u.id_rol,
                     u.username,
                     u.nombre_completo,
+                    u.pregunta_seguridad,
+                    u.respuesta_seguridad,
                     u.activo,
                     u.creado_en,
                     r.nombre AS rol_nombre,
@@ -43,6 +45,8 @@ class UsuarioRepository:
                     u.password_hash,
                     u.salt,
                     u.nombre_completo,
+                    u.pregunta_seguridad,
+                    u.respuesta_seguridad,
                     u.activo,
                     u.creado_en,
                     r.nombre AS rol_nombre
@@ -65,6 +69,8 @@ class UsuarioRepository:
                     u.password_hash,
                     u.salt,
                     u.nombre_completo,
+                    u.pregunta_seguridad,
+                    u.respuesta_seguridad,
                     u.activo,
                     u.creado_en,
                     r.nombre AS rol_nombre
@@ -77,28 +83,38 @@ class UsuarioRepository:
             return dict(row) if row else None
 
     @staticmethod
-    def create(id_rol, username, password_hash, salt, nombre_completo, activo=1):
+    def create(id_rol, username, password_hash, salt, nombre_completo, pregunta_seguridad="¿Nombre de la empresa de transporte colectivo?", respuesta_seguridad="Brisas del Palmar", activo=1):
         with get_db_cursor(commit=True) as cursor:
             cursor.execute(
                 """
-                INSERT INTO usuario (id_rol, username, password_hash, salt, nombre_completo, activo)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO usuario (id_rol, username, password_hash, salt, nombre_completo, pregunta_seguridad, respuesta_seguridad, activo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (id_rol, username.strip().lower(), password_hash, salt, nombre_completo.strip(), activo)
+                (id_rol, username.strip().lower(), password_hash, salt, nombre_completo.strip(), pregunta_seguridad.strip(), respuesta_seguridad.strip(), activo)
             )
             return cursor.lastrowid
 
     @staticmethod
-    def update(id_usuario, id_rol, nombre_completo, activo=1):
+    def update(id_usuario, id_rol, nombre_completo, pregunta_seguridad=None, respuesta_seguridad=None, activo=1):
         with get_db_cursor(commit=True) as cursor:
-            cursor.execute(
-                """
-                UPDATE usuario 
-                SET id_rol = ?, nombre_completo = ?, activo = ?
-                WHERE id_usuario = ?
-                """,
-                (id_rol, nombre_completo.strip(), activo, id_usuario)
-            )
+            if pregunta_seguridad is not None and respuesta_seguridad is not None:
+                cursor.execute(
+                    """
+                    UPDATE usuario 
+                    SET id_rol = ?, nombre_completo = ?, pregunta_seguridad = ?, respuesta_seguridad = ?, activo = ?
+                    WHERE id_usuario = ?
+                    """,
+                    (id_rol, nombre_completo.strip(), pregunta_seguridad.strip(), respuesta_seguridad.strip(), activo, id_usuario)
+                )
+            else:
+                cursor.execute(
+                    """
+                    UPDATE usuario 
+                    SET id_rol = ?, nombre_completo = ?, activo = ?
+                    WHERE id_usuario = ?
+                    """,
+                    (id_rol, nombre_completo.strip(), activo, id_usuario)
+                )
             return cursor.rowcount > 0
 
     @staticmethod
@@ -107,6 +123,15 @@ class UsuarioRepository:
             cursor.execute(
                 "UPDATE usuario SET password_hash = ?, salt = ? WHERE id_usuario = ?",
                 (password_hash, salt, id_usuario)
+            )
+            return cursor.rowcount > 0
+
+    @staticmethod
+    def update_password_by_username(username, password_hash, salt):
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(
+                "UPDATE usuario SET password_hash = ?, salt = ? WHERE LOWER(username) = LOWER(?)",
+                (password_hash, salt, username.strip())
             )
             return cursor.rowcount > 0
 

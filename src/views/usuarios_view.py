@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 import customtkinter as ctk
 from src.controllers.usuario_controller import UsuarioController
+from src.controllers.auth_controller import AuthController
 from src.models.usuario import Usuario
 from src.views.theme import (
     BTN_PRIMARY_COLOR,
@@ -12,7 +13,7 @@ from src.views.theme import (
 )
 
 class UsuariosView(ctk.CTkFrame):
-    def __init__(self, parent, usuario_actual: Usuario):
+    def __init__(self, parent, usuario_actual: Usuario = None, *args, **kwargs):
         super().__init__(parent, corner_radius=10)
         self.usuario_actual = usuario_actual
         self.usuario_seleccionado_id = None
@@ -28,7 +29,7 @@ class UsuariosView(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
 
         # ---------------- PANEL IZQUIERDO: FORMULARIO ----------------
-        self.form_card = ctk.CTkFrame(self, width=320, corner_radius=10)
+        self.form_card = ctk.CTkScrollableFrame(self, width=320, corner_radius=10)
         self.form_card.grid(row=0, column=0, padx=(15, 10), pady=15, sticky="nsew")
 
         lbl_form = ctk.CTkLabel(
@@ -56,7 +57,18 @@ class UsuariosView(ctk.CTkFrame):
         # Contraseña
         ctk.CTkLabel(self.form_card, text="Contraseña (mínimo 4 caracteres):", font=ctk.CTkFont(size=12, weight="bold")).pack(padx=20, pady=(4, 2), anchor="w")
         self.entry_password = ctk.CTkEntry(self.form_card, placeholder_text="Contraseña inicial", show="*")
-        self.entry_password.pack(fill="x", padx=20, pady=(0, 15))
+        self.entry_password.pack(fill="x", padx=20, pady=(0, 8))
+
+        # Pregunta Secreta
+        ctk.CTkLabel(self.form_card, text="Pregunta Secreta de Recuperación:", font=ctk.CTkFont(size=12, weight="bold")).pack(padx=20, pady=(4, 2), anchor="w")
+        self.combo_pregunta = ctk.CTkComboBox(self.form_card, values=AuthController.PREGUNTAS_PREDETERMINADAS)
+        self.combo_pregunta.pack(fill="x", padx=20, pady=(0, 8))
+        self.combo_pregunta.set(AuthController.PREGUNTAS_PREDETERMINADAS[0])
+
+        # Respuesta Secreta
+        ctk.CTkLabel(self.form_card, text="Respuesta Secreta:", font=ctk.CTkFont(size=12, weight="bold")).pack(padx=20, pady=(4, 2), anchor="w")
+        self.entry_respuesta = ctk.CTkEntry(self.form_card, placeholder_text="ej: Brisas del Palmar")
+        self.entry_respuesta.pack(fill="x", padx=20, pady=(0, 15))
 
         # Botones de Acción
         self.btn_guardar = ctk.CTkButton(
@@ -193,6 +205,14 @@ class UsuariosView(ctk.CTkFrame):
             self.entry_password.delete(0, "end")
             self.entry_password.configure(placeholder_text="Sin cambios (usar botón reset)")
 
+            if usuario.pregunta_seguridad:
+                self.combo_pregunta.set(usuario.pregunta_seguridad)
+            else:
+                self.combo_pregunta.set(AuthController.PREGUNTAS_PREDETERMINADAS[0])
+
+            self.entry_respuesta.delete(0, "end")
+            self.entry_respuesta.configure(placeholder_text="Dejar vacío para no cambiar")
+
             self.btn_guardar.configure(text="✏️ Actualizar Usuario")
             if usuario.activo == 1:
                 self.btn_eliminar.configure(text="🗑️ Desactivar Usuario", fg_color=BTN_DANGER_COLOR)
@@ -206,6 +226,9 @@ class UsuariosView(ctk.CTkFrame):
         self.entry_nombre.delete(0, "end")
         self.entry_password.configure(placeholder_text="Contraseña inicial")
         self.entry_password.delete(0, "end")
+        self.combo_pregunta.set(AuthController.PREGUNTAS_PREDETERMINADAS[0])
+        self.entry_respuesta.delete(0, "end")
+        self.entry_respuesta.configure(placeholder_text="ej: Brisas del Palmar")
         if self.roles_map:
             self.combo_rol.set(list(self.roles_map.keys())[0])
         self.btn_guardar.configure(text="💾 Registrar Usuario")
@@ -215,16 +238,24 @@ class UsuariosView(ctk.CTkFrame):
         nombre_rol = self.combo_rol.get()
         id_rol = self.roles_map.get(nombre_rol, 1)
         nombre = self.entry_nombre.get().strip()
+        pregunta = self.combo_pregunta.get().strip()
+        respuesta = self.entry_respuesta.get().strip()
 
         if self.usuario_seleccionado_id is None:
             # Nuevo usuario
             username = self.entry_username.get().strip()
             pwd = self.entry_password.get().strip()
+            if not respuesta:
+                messagebox.showwarning("Atención", "Debe ingresar una respuesta a la pregunta secreta de seguridad.")
+                return
+
             ok, nuevo_u, msg = UsuarioController.registrar_usuario(
                 id_rol=id_rol,
                 username=username,
                 contrasena=pwd,
-                nombre_completo=nombre
+                nombre_completo=nombre,
+                pregunta_seguridad=pregunta,
+                respuesta_seguridad=respuesta
             )
             if ok:
                 messagebox.showinfo("Éxito", msg)
@@ -238,6 +269,8 @@ class UsuariosView(ctk.CTkFrame):
                 id_usuario=self.usuario_seleccionado_id,
                 id_rol=id_rol,
                 nombre_completo=nombre,
+                pregunta_seguridad=pregunta if respuesta else None,
+                respuesta_seguridad=respuesta if respuesta else None,
                 activo=1
             )
             if ok:

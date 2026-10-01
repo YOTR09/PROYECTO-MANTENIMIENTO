@@ -68,10 +68,23 @@ class LoginView(ctk.CTkFrame):
         self.entrada_usuario.bind("<Return>", lambda _event: self._iniciar_sesion())
         self.entrada_contrasena.bind("<Return>", lambda _event: self._iniciar_sesion())
 
+        # Botón Recuperar Contraseña
+        btn_olvido = ctk.CTkButton(
+            formulario,
+            text="¿Olvidaste tu contraseña?",
+            font=ctk.CTkFont(size=11, underline=True),
+            fg_color="transparent",
+            text_color=("#2563EB", "#60A5FA"),
+            hover_color=("gray90", "gray20"),
+            height=20,
+            command=self._abrir_modal_recuperacion
+        )
+        btn_olvido.grid(row=6, column=0, padx=28, pady=(0, 4), sticky="e")
+
         self.mensaje_error = ctk.CTkLabel(
             formulario, text="", text_color="#EF4444", wraplength=340, font=ctk.CTkFont(size=12)
         )
-        self.mensaje_error.grid(row=6, column=0, padx=28, pady=(0, 6))
+        self.mensaje_error.grid(row=7, column=0, padx=28, pady=(0, 6))
 
         btn_login = ctk.CTkButton(
             formulario,
@@ -80,11 +93,11 @@ class LoginView(ctk.CTkFrame):
             font=ctk.CTkFont(size=14, weight="bold"),
             command=self._iniciar_sesion
         )
-        btn_login.grid(row=7, column=0, padx=28, pady=(0, 15), sticky="ew")
+        btn_login.grid(row=8, column=0, padx=28, pady=(0, 15), sticky="ew")
 
         # Tarjeta de ayuda rápida con credenciales de prueba para los 3 roles
         box_roles = ctk.CTkFrame(formulario, corner_radius=8, fg_color=("gray90", "gray17"))
-        box_roles.grid(row=8, column=0, padx=28, pady=(0, 20), sticky="ew")
+        box_roles.grid(row=9, column=0, padx=28, pady=(0, 20), sticky="ew")
 
         ctk.CTkLabel(
             box_roles,
@@ -150,4 +163,17 @@ class LoginView(ctk.CTkFrame):
         self.mensaje_error.configure(text=msg or "Usuario o contraseña incorrectos.")
         self.entrada_contrasena.delete(0, "end")
         self.entrada_contrasena.focus_set()
+
+    def _abrir_modal_recuperacion(self):
+        from src.views.recuperar_password_modal import RecuperarPasswordModal
+        RecuperarPasswordModal(self, on_success_callback=self._al_recuperar_exitoso)
+
+    def _al_recuperar_exitoso(self, username):
+        self.entrada_usuario.delete(0, "end")
+        self.entrada_usuario.insert(0, username)
+        self.entrada_contrasena.delete(0, "end")
         self.entrada_contrasena.focus_set()
+        self.mensaje_error.configure(
+            text="✓ Contraseña actualizada. Ingrese su nueva clave.",
+            text_color="#10B981"
+        )

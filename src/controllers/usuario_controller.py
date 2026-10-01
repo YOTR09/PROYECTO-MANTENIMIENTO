@@ -26,7 +26,9 @@ class UsuarioController(BaseController):
         id_rol: int,
         username: str,
         contrasena: str,
-        nombre_completo: str
+        nombre_completo: str,
+        pregunta_seguridad: str = "¿Nombre de la empresa de transporte colectivo?",
+        respuesta_seguridad: str = "Brisas del Palmar"
     ) -> Tuple[bool, Optional[Usuario], str]:
         if not id_rol:
             return False, None, "Debe seleccionar un rol o nivel de acceso."
@@ -36,6 +38,8 @@ class UsuarioController(BaseController):
             return False, None, "La contraseña debe tener un mínimo de 4 caracteres."
         if not nombre_completo or not nombre_completo.strip():
             return False, None, "El nombre completo del usuario es obligatorio."
+        if not respuesta_seguridad or not respuesta_seguridad.strip():
+            return False, None, "Debe definir la respuesta a la pregunta secreta de seguridad."
 
         usuario_existente = UsuarioRepository.get_by_username(username.strip())
         if usuario_existente:
@@ -51,10 +55,12 @@ class UsuarioController(BaseController):
                 password_hash=pwd_hash,
                 salt=salt,
                 nombre_completo=nombre_completo.strip(),
+                pregunta_seguridad=pregunta_seguridad.strip() if pregunta_seguridad else "¿Nombre de la empresa de transporte colectivo?",
+                respuesta_seguridad=respuesta_seguridad.strip(),
                 activo=1
             )
             usuario = UsuarioController.obtener_usuario(nuevo_id)
-            return True, usuario, "Usuario creado exitosamente con contraseña cifrada."
+            return True, usuario, "Usuario creado exitosamente con contraseña cifrada y pregunta de seguridad."
         except Exception as e:
             return False, None, f"Error al crear el usuario: {str(e)}"
 
@@ -63,6 +69,8 @@ class UsuarioController(BaseController):
         id_usuario: int,
         id_rol: int,
         nombre_completo: str,
+        pregunta_seguridad: Optional[str] = None,
+        respuesta_seguridad: Optional[str] = None,
         activo: int = 1
     ) -> Tuple[bool, str]:
         if not id_usuario:
@@ -77,6 +85,8 @@ class UsuarioController(BaseController):
                 id_usuario=id_usuario,
                 id_rol=id_rol,
                 nombre_completo=nombre_completo.strip(),
+                pregunta_seguridad=pregunta_seguridad,
+                respuesta_seguridad=respuesta_seguridad,
                 activo=activo
             )
             return True, "Datos de usuario actualizados exitosamente."

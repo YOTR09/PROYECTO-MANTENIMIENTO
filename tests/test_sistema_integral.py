@@ -184,5 +184,67 @@ class TestSistemaIntegral(unittest.TestCase):
             self.assertTrue(os.path.exists(r5_path))
             self.assertGreater(os.path.getsize(r5_path), 1000)
 
+    # 5. PRUEBAS DE RECUPERACIÓN DE CONTRASEÑA
+    def test_normalizacion_respuestas_seguridad(self):
+        norm1 = SeguridadService.normalizar_texto_seguridad("  BRÍSAS DEL PALMAR  ")
+        norm2 = SeguridadService.normalizar_texto_seguridad("brisas del palmar")
+        norm3 = SeguridadService.normalizar_texto_seguridad("  Brísas del Pálmar ")
+        self.assertEqual(norm1, "brisas del palmar")
+        self.assertEqual(norm1, norm2)
+        self.assertEqual(norm2, norm3)
+        self.assertTrue(SeguridadService.verificar_respuesta_seguridad("Brísas Del Pálmar", "brisas del palmar"))
+
+    def test_recuperacion_por_pregunta_secreta(self):
+        # 1. Obtener la pregunta registrada
+        ok, pregunta, _ = AuthController.obtener_pregunta_recuperacion("admin")
+        self.assertTrue(ok)
+        self.assertIn("transporte colectivo", pregunta)
+
+        # 2. Intento con respuesta errónea debe ser rechazado
+        ok_bad, msg = AuthController.restablecer_por_pregunta("admin", "Respuesta Totalmente Incorrecta", "nuevaPass1234")
+        self.assertFalse(ok_bad)
+        self.assertIn("incorrecta", msg.lower())
+
+        # 3. Intento con contraseña demasiado corta (< 4 caracteres)
+        ok_short, msg = AuthController.restablecer_por_pregunta("admin", "Brisas del Palmar", "123")
+        self.assertFalse(ok_short)
+
+        # 4. Restablecimiento exitoso con variaciones de mayúsculas y acentos
+        ok_ok, msg = AuthController.restablecer_por_pregunta("admin", "  brísas DEL palmar  ", "adminNueva2026")
+        self.assertTrue(ok_ok)
+
+        # 5. Validar que la nueva contraseña funciona y la anterior no
+        ok_login_old, _, _ = AuthController.login("admin", "admin123")
+        self.assertFalse(ok_login_old)
+
+        ok_login_new, u, _ = AuthController.login("admin", "adminNueva2026")
+        self.assertTrue(ok_login_new)
+        self.assertEqual(u.username, "admin")
+
+        # Devolver contraseña a la original para consistencia
+        AuthController.restablecer_por_clave_maestra("admin", "BRISAS-MASTER-2026", "admin123")
+
+    def test_recuperacion_por_clave_maestra(self):
+        # 1. Clave maestra incorrecta rechaza el cambio
+        ok_bad, _ = AuthController.restablecer_por_clave_maestra("mecanico", "CLAVE-FALSA-123", "mecanicoNewPwd")
+        self.assertFalse(ok_bad)
+
+        # 2. Usuario inexistente rechaza el cambio
+        ok_fake, _ = AuthController.restablecer_por_clave_maestra("no_existo_999", "BRISAS-MASTER-2026", "mecanicoNewPwd")
+        self.assertFalse(ok_fake)
+
+        # 3. Clave maestra correcta restablece inmediatamente
+        ok_good, msg = AuthController.restablecer_por_clave_maestra("mecanico", "BRISAS-MASTER-2026", "mecanicoNuevo99")
+        self.assertTrue(ok_good)
+
+        # 4. Validar login con la nueva contraseña
+        ok_login, u, _ = AuthController.login("mecanico", "mecanicoNuevo99")
+        self.assertTrue(ok_login)
+        self.assertEqual(u.username, "mecanico")
+
+        # Restaurar contraseña original
+        AuthController.restablecer_por_clave_maestra("mecanico", "BRISAS-MASTER-2026", "mecanico123")
+
 if __name__ == "__main__":
     unittest.main()
+

@@ -10,6 +10,8 @@ class Usuario(BaseModel):
         nombre_completo: str,
         password_hash: str = "",
         salt: str = "",
+        pregunta_seguridad: str = "¿Nombre de la empresa de transporte colectivo?",
+        respuesta_seguridad: str = "Brisas del Palmar",
         activo: int = 1,
         creado_en: str = "",
         rol_nombre: str = ""
@@ -20,6 +22,8 @@ class Usuario(BaseModel):
         self.nombre_completo = nombre_completo
         self.password_hash = password_hash
         self.salt = salt
+        self.pregunta_seguridad = pregunta_seguridad
+        self.respuesta_seguridad = respuesta_seguridad
         self.activo = activo
         self.creado_en = creado_en
         self.rol_nombre = rol_nombre
@@ -35,6 +39,8 @@ class Usuario(BaseModel):
             nombre_completo=data.get("nombre_completo", ""),
             password_hash=data.get("password_hash", ""),
             salt=data.get("salt", ""),
+            pregunta_seguridad=data.get("pregunta_seguridad", "¿Nombre de la empresa de transporte colectivo?"),
+            respuesta_seguridad=data.get("respuesta_seguridad", "Brisas del Palmar"),
             activo=data.get("activo", 1),
             creado_en=data.get("creado_en", ""),
             rol_nombre=data.get("rol_nombre", "")

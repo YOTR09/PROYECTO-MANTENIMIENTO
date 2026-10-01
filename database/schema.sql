@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS usuario (
     password_hash TEXT NOT NULL,
     salt TEXT NOT NULL,
     nombre_completo TEXT NOT NULL,
+    pregunta_seguridad TEXT NOT NULL DEFAULT '¿Nombre de la empresa de transporte colectivo?',
+    respuesta_seguridad TEXT NOT NULL DEFAULT 'Brisas del Palmar',
     activo INTEGER NOT NULL DEFAULT 1 CHECK(activo IN (0, 1)),
     creado_en TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (id_rol) REFERENCES rol(id_rol) ON DELETE RESTRICT

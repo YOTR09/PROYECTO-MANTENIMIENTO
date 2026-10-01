@@ -26,3 +26,21 @@ class SeguridadService:
         """Verifica en tiempo constante si la contraseña plana coincide con el hash almacenado."""
         nuevo_hash = cls.hashear_contrasena(contrasena_plana, salt)
         return secrets.compare_digest(nuevo_hash, password_hash)
+
+    @classmethod
+    def normalizar_texto_seguridad(cls, texto: str) -> str:
+        """Normaliza texto removiendo acentos, espacios superfluos y convirtiendo a minúsculas."""
+        import unicodedata
+        if not texto:
+            return ""
+        nfkd = unicodedata.normalize("NFKD", texto.strip().lower())
+        return "".join(c for c in nfkd if not unicodedata.combining(c))
+
+    @classmethod
+    def verificar_respuesta_seguridad(cls, respuesta_ingresada: str, respuesta_guardada: str) -> bool:
+        """Compara la respuesta ingresada contra la respuesta guardada de forma flexible y segura."""
+        norm_ingresada = cls.normalizar_texto_seguridad(respuesta_ingresada)
+        norm_guardada = cls.normalizar_texto_seguridad(respuesta_guardada)
+        if not norm_ingresada or not norm_guardada:
+            return False
+        return secrets.compare_digest(norm_ingresada, norm_guardada)

@@ -60,17 +60,34 @@ def _migrar_columnas_activo(conn):
         except Exception:
             pass
 
+def _migrar_columnas_seguridad(conn):
+    """Garantiza compatibilidad agregando las columnas de pregunta y respuesta de seguridad en usuario"""
+    cursor = conn.cursor()
+    try:
+        cursor.execute("PRAGMA table_info(usuario)")
+        columnas = [row["name"] for row in cursor.fetchall()]
+        if columnas:
+            if "pregunta_seguridad" not in columnas:
+                cursor.execute("ALTER TABLE usuario ADD COLUMN pregunta_seguridad TEXT NOT NULL DEFAULT '¿Nombre de la empresa de transporte colectivo?'")
+            if "respuesta_seguridad" not in columnas:
+                cursor.execute("ALTER TABLE usuario ADD COLUMN respuesta_seguridad TEXT NOT NULL DEFAULT 'Brisas del Palmar'")
+            conn.commit()
+    except Exception:
+        pass
+
 def init_db():
     """Inicializa la base de datos ejecutando el esquema, migraciones y semillas si es nueva"""
     ensure_data_dir()
     conn = get_db_connection()
     try:
         _migrar_columnas_activo(conn)
+        _migrar_columnas_seguridad(conn)
 
         with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
             conn.executescript(f.read())
 
         _migrar_columnas_activo(conn)
+        _migrar_columnas_seguridad(conn)
 
         # Verificar e insertar semillas si faltan roles, usuarios o mantenimientos
         cursor = conn.cursor()
