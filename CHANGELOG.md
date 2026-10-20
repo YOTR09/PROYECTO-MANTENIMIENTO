@@ -3,6 +3,16 @@
 Todas las modificaciones notables de este proyecto serán documentadas en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [Sin publicar]
+
+### Agregado
+- Catálogo completo de diagramas ([`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md)): MVC, capas, UML de clases, ER, casos de uso, secuencia, estados, actividad, navegación y despliegue.
+- Reportes con filtros (`modal_filtros_reporte.py`, `ReporteController.normalizar_filtros`) y suite `tests/test_reportes_filtros.py` (10 pruebas).
+- Script de datos de prueba `database/seed_data.py`.
+
+### Modificado
+- Documentación revisada y alineada con el código: capa `services/` marcada como heredada, suite de 21 pruebas, árbol de directorios y diagramas actualizados.
+
 ## [2.0.0] - 2026-09-30
 
 ### Agregado

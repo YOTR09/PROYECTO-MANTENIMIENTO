@@ -94,10 +94,10 @@ En lugar de que alguien tenga que copiar datos manualmente a un Word o Excel, el
 2. ReportesView le avisa al ReporteController
          │
          ▼
-3. ReporteController le pide los datos a los servicios (mantenimiento, vehículos, etc.)
+3. ReporteController valida los filtros y le pide los datos a los repositorios (mantenimiento, vehículos, socios, etc.)
          │
          ▼
-4. Los servicios consultan los repositorios, que consultan la base de datos
+4. Los repositorios consultan la base de datos
          │
          ▼
 5. Los datos regresan a ReporteController, que los pasa al generador

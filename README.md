@@ -10,7 +10,8 @@ Aplicación de escritorio moderna y profesional desarrollada en **Python** con *
    - **Vistas (`src/views/`):** Interfaz gráfica moderna, reactiva y estilizada con CustomTkinter.
    - **Controladores (`src/controllers/`):** Orquestación desacoplada de la lógica, validaciones y permisos.
    - **Modelos (`src/models/`):** Entidades de dominio con programación orientada a objetos (POO).
-   - **Repositorios (`src/repositories/`):** Consultas SQL parametrizadas y aisladas del motor SQLite.
+   - **Repositorios (`src/repositories/`):** Consultas SQL parametrizadas y aisladas del motor SQLite (acceso a datos del Modelo).
+   - Diagramas MVC y UML: [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md).
 
 2. **Seguridad Robusta y 3 Niveles de Acceso (Roles):**
    - Autenticación persistida en base de datos con **PBKDF2-HMAC-SHA256**, sal criptográfica de 16 bytes y verificación de tiempo constante (`secrets.compare_digest`).
@@ -55,6 +56,7 @@ python3 main.py
 ```bash
 python3 -m unittest discover tests -v
 ```
+La suite incluye 21 pruebas (3 + 8 + 10) y requiere las dependencias de `requirements.txt` instaladas.
 
 ---
 
@@ -66,4 +68,14 @@ python3 -m unittest discover tests -v
 | **Mecánico** | `mecanico` | `mecanico123` |
 | **Operador / Auditor** | `auditor` | `auditor123` |
 
-Para más detalles técnicos, consulte el documento [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) y [`docs/LOGIN.md`](docs/LOGIN.md).
+## 📚 Documentación
+
+| Documento | Contenido |
+|---|---|
+| [`docs/README.md`](docs/README.md) | Índice general |
+| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Arquitectura MVC/capas, BD, semáforo, estructura de carpetas |
+| [`docs/DIAGRAMAS.md`](docs/DIAGRAMAS.md) | **Todos los diagramas:** MVC, UML de clases, ER, casos de uso, secuencia, estados, actividad, despliegue |
+| [`docs/GUIA_INSTALACION_Y_USO.md`](docs/GUIA_INSTALACION_Y_USO.md) | Instalación y manual de usuario |
+| [`docs/LOGIN.md`](docs/LOGIN.md) | Autenticación y seguridad |
+| [`docs/guia-principiantes/`](docs/guia-principiantes/00-INDICE.md) | Guía para principiantes |
+| [`CHANGELOG.md`](CHANGELOG.md) | Historial de versiones |

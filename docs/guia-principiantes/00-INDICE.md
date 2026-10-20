@@ -27,4 +27,6 @@
 
 ---
 
+> 📐 **Diagramas técnicos (MVC, UML, ER, secuencia):** consulta [`../DIAGRAMAS.md`](../DIAGRAMAS.md).
+
 > 📌 **Nota:** Todos los términos marcados en *cursiva* están explicados en el [Glosario](./08-GLOSARIO.md).

@@ -24,11 +24,11 @@ El sistema cuenta con 3 cuentas predeterminadas precargadas en la base de datos:
 A diferencia de un login básico, la seguridad del sistema está respaldada en base de datos (`usuario`):
 
 1. **Hashing con Sal Aleatoria (Salt):**
-   - Cada contraseña se procesa con **PBKDF2-HMAC-SHA256** utilizando **100,000 iteraciones** y una sal criptográfica única de 16 bytes generada con [`secrets.token_hex(16)`](file:///home/yheremyt/PROYECTO-MANTENIMIENTO/src/services/seguridad_service.py).
+   - Cada contraseña se procesa con **PBKDF2-HMAC-SHA256** utilizando **100,000 iteraciones** y una sal criptográfica única de 16 bytes generada con [`secrets.token_hex(16)`](../src/services/seguridad_service.py).
    - Ninguna contraseña se almacena en texto plano en la base de datos ni en el código.
 
 2. **Comparación en Tiempo Constante:**
-   - Para mitigar ataques de temporización (*timing attacks*), la verificación compara los hashes mediante [`secrets.compare_digest`](file:///home/yheremyt/PROYECTO-MANTENIMIENTO/src/services/seguridad_service.py).
+   - Para mitigar ataques de temporización (*timing attacks*), la verificación compara los hashes mediante [`secrets.compare_digest`](../src/services/seguridad_service.py).
 
 3. **Control de Sesiones Inactivas:**
    - Las cuentas dadas de baja lógica (`activo = 0`) no pueden iniciar sesión; el sistema rechaza el intento informando el estado de la cuenta.
@@ -54,3 +54,6 @@ En la pantalla de acceso, el enlace **"¿Olvidaste tu contraseña?"** abre un mo
 ---
 
 Para volver al índice de documentación, consulta el [`README.md`](README.md) de la carpeta `docs/` o el [`README.md`](../README.md) principal.
+
+
+> Diagramas de secuencia del login y la recuperación de contraseña: [`DIAGRAMAS.md`](DIAGRAMAS.md#91-inicio-de-sesión).

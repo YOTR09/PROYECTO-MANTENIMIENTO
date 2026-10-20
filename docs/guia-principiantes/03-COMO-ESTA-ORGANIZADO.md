@@ -62,7 +62,7 @@ src/
 ├── 📂 views/           ← Lo que el usuario VE (pantallas, botones)
 ├── 📂 controllers/     ← El "cerebro" que coordina todo
 ├── 📂 models/          ← La definición de los datos (qué es un vehículo, etc.)
-├── 📂 services/        ← Las reglas del negocio (cómo calcular alertas, etc.)
+├── 📂 services/        ← Seguridad de contraseñas (activo) y servicios heredados
 ├── 📂 repositories/    ← Cómo se guarda y recupera información de la BD
 └── 📂 reports/         ← Cómo se generan los PDF y Excel
 ```
@@ -83,7 +83,8 @@ Contiene `database.py`, que es el archivo que sabe:
 Contiene dos archivos SQL (instrucciones para la base de datos):
 
 - **`schema.sql`** — Define la estructura: qué tablas existen, qué columnas tienen. Es como el plano de un edificio.
-- **`seeds.sql`** — Carga los datos iniciales: los 10 tipos de mantenimiento que vienen preinstalados. Es como el mobiliario inicial.
+- **`seeds.sql`** — Carga los datos iniciales: roles, usuarios predeterminados, los 10 tipos de mantenimiento y datos de demostración. Es como el mobiliario inicial.
+- **`seed_data.py`** — Script para restaurar los datos de prueba (`python database/seed_data.py --reset`).
 
 ---
 
@@ -136,6 +137,7 @@ Esta es la subcarpeta más grande. Cada archivo corresponde a una pantalla del p
 | `historial_mant_view.py` | Bitácora histórica de servicios |
 | `reportes_view.py` | Centro de generación de reportes |
 | `usuarios_view.py` | Gestión de usuarios del sistema |
+| `modal_filtros_reporte.py` | Ventana de filtros de los reportes |
 | `theme.py` | Colores, estilos y diseño visual |
 | `recuperar_password_modal.py` | Ventana para recuperar contraseña |
 

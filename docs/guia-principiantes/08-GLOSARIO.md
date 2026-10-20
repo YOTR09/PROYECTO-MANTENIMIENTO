@@ -39,7 +39,7 @@ El proceso de convertir información legible en un código incomprensible para p
 Un molde o plantilla para crear objetos. Por ejemplo, la clase `Vehiculo` define qué propiedades tiene todo vehículo: placa, marca, modelo, kilometraje...
 
 ### Controlador (Controller)
-En el patrón MVC, el controlador es el "coordinador" que recibe pedidos de la vista y los dirige al servicio correcto. Es como el mesero de un restaurante.
+En el patrón MVC, el controlador es el "coordinador" que recibe pedidos de la vista, valida los datos, aplica las reglas de negocio y los dirige al repositorio correcto. Es como el mesero de un restaurante.
 
 ### CRUD
 Acrónimo de las 4 operaciones básicas con datos:
@@ -191,7 +191,7 @@ Un valor aleatorio único que se agrega a la contraseña antes de cifrarla, para
 Un indicador visual de color (rojo/amarillo/verde) que comunica el estado de algo de forma intuitiva. Este proyecto usa semáforos para indicar el estado de los mantenimientos.
 
 ### Servicio (Service)
-En la arquitectura de este proyecto, los servicios contienen las "reglas del negocio" — la lógica de cómo funciona el sistema. Por ejemplo, el servicio de mantenimiento sabe cómo calcular si un servicio está vencido.
+Clase que encapsula lógica reutilizable. En este proyecto, `SeguridadService` (cifrado de contraseñas) es el servicio activo; los demás servicios son heredados de la versión 1.x, cuyas reglas de negocio hoy viven en los controladores (por ejemplo, el cálculo de si un mantenimiento está vencido).
 
 ### Soft Delete (Eliminación Lógica)
 Técnica donde los registros no se borran físicamente de la base de datos, sino que se marcan como "inactivos" (`activo = 0`). Preserva el historial pero los oculta de las listas normales.

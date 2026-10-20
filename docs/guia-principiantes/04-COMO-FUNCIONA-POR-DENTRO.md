@@ -31,7 +31,7 @@ Para entender MVC, imaginemos una pizzería:
 🧠 GERENTE (= CONTROLADOR / CONTROLLER)
     │   Coordina y da instrucciones al
     ▼
-👨‍🍳 COCINERO + RECETAS (= MODELO + SERVICIO)
+👨‍🍳 COCINERO + RECETAS + DESPENSA (= MODELO + REPOSITORIO)
     │   Prepara la pizza según la receta
     ▼
 🍕 PIZZA LISTA → vuelve al MESERO → llega al CLIENTE
@@ -41,11 +41,13 @@ En el programa:
 - El **Cliente** = Tú, usando la pantalla
 - El **Mesero (Vista)** = Los archivos en `src/views/` — muestra la información, captura lo que escribes
 - El **Gerente (Controlador)** = Los archivos en `src/controllers/` — coordina y decide qué hacer
-- El **Cocinero + Recetas (Servicio + Modelo)** = Los archivos en `src/services/` y `src/models/` — aplica las reglas del negocio
+- El **Cocinero + Recetas + Despensa (Modelo + Repositorio)** = Los archivos en `src/models/` y `src/repositories/` — definen los datos y los guardan/recuperan
 
 ---
 
-## 🔄 Las 4 capas del sistema explicadas
+> 📐 Los diagramas formales (MVC, UML de clases, secuencia, ER) están en [`../DIAGRAMAS.md`](../DIAGRAMAS.md).
+
+## 🔄 Las capas del sistema explicadas
 
 ### 1️⃣ CAPA DE VISTA (`src/views/`) — Lo que ves
 **Responsabilidad:** Mostrar información en pantalla y capturar lo que el usuario hace (clics, texto escrito, etc.).
@@ -57,7 +59,7 @@ En el programa:
 ---
 
 ### 2️⃣ CAPA DE CONTROLADOR (`src/controllers/`) — El coordinador
-**Responsabilidad:** Recibir lo que pide la vista, llamar al servicio correcto, y devolver el resultado.
+**Responsabilidad:** Recibir lo que pide la vista, validar los datos, aplicar las reglas de negocio, llamar al repositorio correcto y devolver el resultado como `(ok, dato, mensaje)`.
 
 **Los controladores del proyecto:**
 | Archivo | ¿Qué coordina? |
@@ -71,26 +73,18 @@ En el programa:
 
 ---
 
-### 3️⃣ CAPA DE SERVICIO (`src/services/`) — Las reglas del negocio
-**Responsabilidad:** Aplicar la lógica de negocio. Por ejemplo: "¿Está vencido este mantenimiento?", "¿Es válida esta contraseña?", "¿Cuál es la fecha del próximo servicio?"
+### 3️⃣ CAPA DE SERVICIO (`src/services/`) — Heredada, con una pieza activa
+En la versión 1.x las reglas de negocio vivían aquí. Desde la versión 2.0 esas reglas se movieron a los **controladores**. Hoy:
 
-**Ejemplo del sistema de semáforo:**
-```
-Si (km_próximo - km_actual) <= 0    → Estado VENCIDO 🔴
-Si (km_próximo - km_actual) <= 500  → Estado POR VENCER 🟡
-Si no                               → Estado AL DÍA 🟢
-```
-Esta lógica vive en `mantenimiento_service.py`.
+- **`seguridad_service.py`** — ✅ **ACTIVO**: cifra y verifica contraseñas (PBKDF2) y normaliza respuestas secretas. Lo usan `AuthController` y `UsuarioController`.
+- El resto (`mantenimiento_service.py`, `vehiculo_service.py`, `socio_service.py`, `tipo_mantenimiento_service.py`, `autenticacion_service.py`) es **heredado (legacy)**: la aplicación no lo usa; solo lo ejercitan las pruebas de `tests/test_services.py`.
 
-**Los servicios del proyecto:**
-| Archivo | ¿Qué reglas aplica? |
-|---|---|
-| `mantenimiento_service.py` | Calcula alertas, próximos servicios, dashboard |
-| `vehiculo_service.py` | Valida y gestiona vehículos |
-| `socio_service.py` | Valida y gestiona socios |
-| `seguridad_service.py` | Cifra y verifica contraseñas |
-| `autenticacion_service.py` | Gestiona la sesión activa |
-| `tipo_mantenimiento_service.py` | Gestiona el catálogo de rutinas |
+**Ejemplo del semáforo** (hoy en `MantenimientoController.calcular_estado_alerta`; se evalúan km **y** días, y gana el más grave):
+```
+Si km_restantes <= 0   o  días_restantes <= 0    → VENCIDO 🔴
+Si km_restantes <= 500 o  días_restantes <= 10   → POR VENCER 🟡
+Si no                                            → AL DÍA 🟢
+```
 
 ---
 
@@ -122,7 +116,7 @@ Y devuelve una lista de objetos Python listos para usar.
 4. Escribes usuario y contraseña → Clic en "Entrar"
       │
       ▼
-5. AuthController verifica credenciales con SeguridadService
+5. AuthController busca el usuario (UsuarioRepository) y verifica la contraseña con SeguridadService
       │
       ├── Si es INCORRECTO → La vista muestra un mensaje de error
       │
@@ -138,7 +132,7 @@ Y devuelve una lista de objetos Python listos para usar.
           8. La base de datos devuelve los datos
                 │
                 ▼
-          9. MantenimientoService calcula el estado de cada semáforo
+          9. MantenimientoController calcula el estado de cada semáforo
                 │
                 ▼
          10. DashboardView muestra los datos con los colores correctos 🎨
@@ -158,13 +152,16 @@ Un **modelo** es simplemente la definición de cómo es un objeto. Por ejemplo, 
 
 Es como el molde de una galleta — define la forma que tendrán todos los datos de vehículos.
 
+**Todos los modelos heredan de `BaseModel`** (clase base con `from_dict()` y `to_dict()`).
+
 **Los modelos del proyecto:**
 | Archivo | ¿Qué define? |
 |---|---|
 | `vehiculo.py` | Qué datos tiene un vehículo |
 | `socio.py` | Qué datos tiene un socio/propietario |
 | `usuario.py` | Qué datos tiene un usuario del sistema |
-| `mantenimiento.py` | Qué datos tiene un mantenimiento |
+| `mantenimiento.py` | Mantenimiento programado e historial de mantenimiento |
+| `base_model.py` | Clase base con `from_dict()` / `to_dict()` |
 | `tipo_mantenimiento.py` | Qué datos tiene un tipo de mantenimiento |
 | `rol.py` | Qué datos tiene un rol de usuario |
 | `enums.py` | Listas fijas de valores (estados posibles) |

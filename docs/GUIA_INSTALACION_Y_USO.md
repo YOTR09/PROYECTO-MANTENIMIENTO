@@ -50,7 +50,7 @@ Con el entorno virtual activado, ejecuta:
 pip install -r requirements.txt
 ```
 
-*(Instalará `customtkinter>=6.0.0` y sus utilidades complementarias).*
+*(Instalará `customtkinter>=6.0.0`, `reportlab>=4.0.0`, `openpyxl>=3.1.0` y `pillow>=10.0.0`).*
 
 ---
 
@@ -70,7 +70,7 @@ venv/bin/python main.py
 
 > [!NOTE]
 > **Inicialización Automática en el Primer Arranque:**
-> La primera vez que abras el programa, el sistema creará automáticamente la carpeta `data/` y el archivo de base de datos `data/mantenimiento.db`. Además, cargará el catálogo inicial con las **10 rutinas de mantenimiento preventivo** investigadas para transporte colectivo. No necesitas ejecutar scripts SQL manuales.
+> La primera vez que abras el programa, el sistema creará automáticamente la carpeta `data/` y el archivo de base de datos `data/mantenimiento.db`. Además, cargará los 3 roles, las 3 cuentas predeterminadas, el catálogo de **10 rutinas de mantenimiento preventivo** y datos de demostración (socios, flota, programaciones e historial). Para restaurar los datos de prueba: `python database/seed_data.py --reset`. No necesitas ejecutar scripts SQL manuales.
 
 ---
 
@@ -219,7 +219,7 @@ Permite exportar informes con calidad ejecutiva para auditorías, directiva y co
 - **Reporte 4 (PDF):** Directorio Institucional de Socios y Unidades Asignadas.
 - **Reporte 5 (Excel):** Resumen Ejecutivo y Métricas de Rendimiento por Taller Mecánico.
 
-Para emitir un reporte, haz clic en **"Generar Reporte"**, elige la carpeta de destino y el archivo se generará al instante.
+Para emitir un reporte, haz clic en **"Generar Reporte"**, define los **filtros** en la ventana modal (fechas, tipo de rutina, taller, estado, etc.; los filtros inválidos se rechazan con un aviso), elige la carpeta de destino y el archivo se generará al instante.
 
 ---
 
@@ -258,7 +258,7 @@ Respaldar toda la información de Brisas del Palmar es sumamente sencillo:
 
 ## 🧪 Ejecución de Pruebas Unitarias
 
-El proyecto incluye una suite integral de 11 pruebas automatizadas para verificar autenticación criptográfica, persistencia, roles, transaccionalidad y generación de reportes:
+El proyecto incluye una suite integral de 21 pruebas automatizadas (3 en `test_services.py`, 8 en `test_sistema_integral.py` y 10 en `test_reportes_filtros.py`) para verificar autenticación criptográfica, persistencia, roles, transaccionalidad y generación de reportes:
 
 ```bash
 ./venv/bin/python -m unittest discover tests -v
@@ -267,7 +267,7 @@ El proyecto incluye una suite integral de 11 pruebas automatizadas para verifica
 Salida esperada:
 
 ```text
-Ran 11 tests in 1.15s
+Ran 21 tests in ...s
 
 OK
 ```
@@ -280,3 +280,9 @@ Las pruebas cubren:
 5. `test_generacion_cinco_reportes`: Generación íntegra de los 5 archivos en PDF y Excel verificando cabeceras y estructura de bytes.
 6. `test_recuperacion_por_pregunta_secreta` y `test_recuperacion_por_clave_maestra`: Restablecimiento de accesos seguro.
 7. `test_programacion_mantenimiento_y_alertas`: Motor de semáforos preventivos y reprogramación automática por odómetro.
+8. `test_normalizacion_respuestas_seguridad`: Normalización de respuestas secretas (acentos, mayúsculas, espacios).
+9. `test_reportes_filtros.py` (10 pruebas): Normalización y validación de filtros (fechas, enteros), consultas filtradas de flota, preventivo, historial y socios, talleres únicos y generación de reportes con filtros, sin resultados o con filtros inválidos.
+10. `test_services.py` (3 pruebas): Capa heredada de servicios (credenciales, flujo socio-vehículo, programación y alertas).
+
+> [!NOTE]
+> Los diagramas de arquitectura (MVC, UML, ER, secuencia) se encuentran en [`DIAGRAMAS.md`](DIAGRAMAS.md).
