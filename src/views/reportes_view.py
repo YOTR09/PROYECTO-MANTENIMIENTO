@@ -8,8 +8,11 @@ from src.views.theme import (
     KPI_INFO_HOVER,
     KPI_SUCCESS_COLOR,
     KPI_SUCCESS_HOVER,
+    BTN_NEUTRAL_COLOR,
+    BTN_NEUTRAL_HOVER,
     TEXT_MUTED
 )
+from src.views.modal_filtros_reporte import ModalFiltrosReporte
 
 class ReportesView(ctk.CTkFrame):
     def __init__(self, parent):
@@ -139,15 +142,33 @@ class ReportesView(ctk.CTkFrame):
         action_f = ctk.CTkFrame(card, fg_color="transparent")
         action_f.pack(fill="x", padx=15, pady=(0, 12))
 
+        btn_filtrar = ctk.CTkButton(
+            action_f,
+            text="⚙️ Filtrar y Exportar",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            width=200,
+            height=36,
+            command=lambda rep=r: self._abrir_filtros(rep)
+        )
+        btn_filtrar.pack(side="left", padx=(0, 10))
+
         btn = ctk.CTkButton(
             action_f,
-            text=f"📥 Generar y Guardar {r['formato']}",
+            text=f"⚡ Exportar Todo ({r['formato']})",
             font=ctk.CTkFont(size=13, weight="bold"),
             width=220,
             height=36,
+            fg_color=BTN_NEUTRAL_COLOR,
+            hover_color=BTN_NEUTRAL_HOVER,
             command=lambda rep=r: rep["comando"](rep)
         )
         btn.pack(side="left")
+
+    def _abrir_filtros(self, rep):
+        ModalFiltrosReporte(
+            self, rep,
+            on_exportar=lambda filtros, rep=rep: rep["comando"](rep, filtros)
+        )
 
     def _solicitar_ruta_guardado(self, rep):
         return filedialog.asksaveasfilename(
@@ -157,39 +178,39 @@ class ReportesView(ctk.CTkFrame):
             defaultextension=rep["tipo_archivo"][0][1]
         )
 
-    def _generar_reporte_1(self, rep):
+    def _generar_reporte_1(self, rep, filtros=None):
         ruta = self._solicitar_ruta_guardado(rep)
         if not ruta:
             return
-        ok, msg = ReporteController.generar_reporte_1_flota_pdf(ruta)
+        ok, msg = ReporteController.generar_reporte_1_flota_pdf(ruta, filtros)
         self._mostrar_resultado(ok, msg)
 
-    def _generar_reporte_2(self, rep):
+    def _generar_reporte_2(self, rep, filtros=None):
         ruta = self._solicitar_ruta_guardado(rep)
         if not ruta:
             return
-        ok, msg = ReporteController.generar_reporte_2_preventivo_pdf(ruta)
+        ok, msg = ReporteController.generar_reporte_2_preventivo_pdf(ruta, filtros)
         self._mostrar_resultado(ok, msg)
 
-    def _generar_reporte_3(self, rep):
+    def _generar_reporte_3(self, rep, filtros=None):
         ruta = self._solicitar_ruta_guardado(rep)
         if not ruta:
             return
-        ok, msg = ReporteController.generar_reporte_3_historial_excel(ruta)
+        ok, msg = ReporteController.generar_reporte_3_historial_excel(ruta, filtros)
         self._mostrar_resultado(ok, msg)
 
-    def _generar_reporte_4(self, rep):
+    def _generar_reporte_4(self, rep, filtros=None):
         ruta = self._solicitar_ruta_guardado(rep)
         if not ruta:
             return
-        ok, msg = ReporteController.generar_reporte_4_socios_pdf(ruta)
+        ok, msg = ReporteController.generar_reporte_4_socios_pdf(ruta, filtros)
         self._mostrar_resultado(ok, msg)
 
-    def _generar_reporte_5(self, rep):
+    def _generar_reporte_5(self, rep, filtros=None):
         ruta = self._solicitar_ruta_guardado(rep)
         if not ruta:
             return
-        ok, msg = ReporteController.generar_reporte_5_metricas_excel(ruta)
+        ok, msg = ReporteController.generar_reporte_5_metricas_excel(ruta, filtros)
         self._mostrar_resultado(ok, msg)
 
     def _mostrar_resultado(self, ok: bool, msg: str):

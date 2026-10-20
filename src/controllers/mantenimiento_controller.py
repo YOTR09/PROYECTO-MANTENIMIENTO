@@ -153,13 +153,15 @@ class MantenimientoController(BaseController):
         return MantenimientoProgramado.from_dict(fila)
 
     @staticmethod
-    def listar_programaciones(id_vehiculo: Optional[int] = None, search_term: Optional[str] = None, estado_filtro: Optional[str] = None, solo_activos: bool = True) -> List[MantenimientoProgramado]:
-        filas = MantenimientoRepository.get_programaciones(id_vehiculo=id_vehiculo, search_term=search_term, solo_activos=solo_activos)
+    def listar_programaciones(id_vehiculo: Optional[int] = None, search_term: Optional[str] = None, estado_filtro: Optional[str] = None, solo_activos: bool = True, id_tipo: Optional[int] = None, fecha_desde: Optional[str] = None, fecha_hasta: Optional[str] = None) -> List[MantenimientoProgramado]:
+        filas = MantenimientoRepository.get_programaciones(id_vehiculo=id_vehiculo, search_term=search_term, solo_activos=solo_activos, id_tipo=id_tipo, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta)
         resultado = []
         for f in filas:
             alerta = MantenimientoController.calcular_estado_alerta(f)
             f.update(alerta)
-            if not estado_filtro or estado_filtro == "Todos" or f["estado"] == estado_filtro:
+            if (not estado_filtro or estado_filtro == "Todos"
+                    or f["estado"] == estado_filtro
+                    or (estado_filtro == "Críticos" and f["estado"] in ("Vencido", "Por Vencer"))):
                 resultado.append(MantenimientoProgramado.from_dict(f))
         return resultado
 
@@ -295,8 +297,8 @@ class MantenimientoController(BaseController):
             return False, None, f"Error al registrar la intervención: {str(e)}"
 
     @staticmethod
-    def listar_historial(id_vehiculo: Optional[int] = None, search_term: Optional[str] = None, limit: int = 500) -> List[HistorialMantenimiento]:
-        filas = MantenimientoRepository.get_historial(id_vehiculo=id_vehiculo, search_term=search_term, limit=limit)
+    def listar_historial(id_vehiculo: Optional[int] = None, search_term: Optional[str] = None, limit: int = 500, fecha_desde: Optional[str] = None, fecha_hasta: Optional[str] = None, id_tipo: Optional[int] = None, taller_mecanico: Optional[str] = None) -> List[HistorialMantenimiento]:
+        filas = MantenimientoRepository.get_historial(id_vehiculo=id_vehiculo, search_term=search_term, limit=limit, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, id_tipo=id_tipo, taller_mecanico=taller_mecanico)
         return [HistorialMantenimiento.from_dict(row) for row in filas]
 
     @staticmethod

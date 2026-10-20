@@ -2,7 +2,7 @@ from config.database import get_db_cursor
 
 class VehiculoRepository:
     @staticmethod
-    def get_all(search_term=None, status_filter=None, solo_activos=True):
+    def get_all(search_term=None, status_filter=None, solo_activos=True, id_socio=None, km_min=None, km_max=None):
         with get_db_cursor() as cursor:
             query = """
                 SELECT 
@@ -33,6 +33,18 @@ class VehiculoRepository:
             if status_filter and status_filter != "Todos":
                 query += " AND v.status = ?"
                 params.append(status_filter)
+
+            if id_socio:
+                query += " AND v.id_socio = ?"
+                params.append(id_socio)
+
+            if km_min is not None:
+                query += " AND v.kilometraje_actual >= ?"
+                params.append(km_min)
+
+            if km_max is not None:
+                query += " AND v.kilometraje_actual <= ?"
+                params.append(km_max)
 
             query += " ORDER BY v.numero_unidad ASC"
             cursor.execute(query, params)

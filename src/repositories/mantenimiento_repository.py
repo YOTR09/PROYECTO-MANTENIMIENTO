@@ -2,7 +2,7 @@ from config.database import get_db_cursor
 
 class MantenimientoRepository:
     @staticmethod
-    def get_programaciones(id_vehiculo=None, search_term=None, solo_activos=True):
+    def get_programaciones(id_vehiculo=None, search_term=None, solo_activos=True, id_tipo=None, fecha_desde=None, fecha_hasta=None):
         with get_db_cursor() as cursor:
             query = """
                 SELECT 
@@ -37,7 +37,19 @@ class MantenimientoRepository:
             if id_vehiculo:
                 query += " AND mp.id_vehiculo = ?"
                 params.append(id_vehiculo)
-            
+
+            if id_tipo:
+                query += " AND mp.id_tipo = ?"
+                params.append(id_tipo)
+
+            if fecha_desde:
+                query += " AND mp.fecha_proximo_servicio IS NOT NULL AND mp.fecha_proximo_servicio >= ?"
+                params.append(fecha_desde)
+
+            if fecha_hasta:
+                query += " AND mp.fecha_proximo_servicio IS NOT NULL AND mp.fecha_proximo_servicio <= ?"
+                params.append(fecha_hasta)
+
             if search_term:
                 query += " AND (v.numero_unidad LIKE ? OR v.placa LIKE ? OR tm.nombre LIKE ? OR s.nombre_completo LIKE ?)"
                 wildcard = f"%{search_term.strip()}%"
@@ -128,7 +140,7 @@ class MantenimientoRepository:
             return cursor.lastrowid
 
     @staticmethod
-    def get_historial(id_vehiculo=None, search_term=None, limit=500):
+    def get_historial(id_vehiculo=None, search_term=None, limit=500, fecha_desde=None, fecha_hasta=None, id_tipo=None, taller_mecanico=None):
         with get_db_cursor() as cursor:
             query = """
                 SELECT 
@@ -155,6 +167,22 @@ class MantenimientoRepository:
                 query += " AND h.id_vehiculo = ?"
                 params.append(id_vehiculo)
 
+            if id_tipo:
+                query += " AND h.id_tipo = ?"
+                params.append(id_tipo)
+
+            if fecha_desde:
+                query += " AND h.fecha_realizado >= ?"
+                params.append(fecha_desde)
+
+            if fecha_hasta:
+                query += " AND h.fecha_realizado <= ?"
+                params.append(fecha_hasta)
+
+            if taller_mecanico:
+                query += " AND h.taller_mecanico = ?"
+                params.append(taller_mecanico)
+
             if search_term:
                 query += " AND (v.numero_unidad LIKE ? OR v.placa LIKE ? OR tm.nombre LIKE ? OR h.taller_mecanico LIKE ?)"
                 wildcard = f"%{search_term.strip()}%"
@@ -166,4 +194,15 @@ class MantenimientoRepository:
             cursor.execute(query, params)
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
+
+    @staticmethod
+    def get_talleres_registrados():
+        """Lista de talleres mecánicos únicos registrados en la bitácora."""
+        with get_db_cursor() as cursor:
+            cursor.execute(
+                "SELECT DISTINCT taller_mecanico FROM historial_mantenimiento "
+                "WHERE taller_mecanico IS NOT NULL AND TRIM(taller_mecanico) <> '' "
+                "ORDER BY taller_mecanico ASC"
+            )
+            return [row[0] for row in cursor.fetchall()]
 

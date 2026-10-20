@@ -8,7 +8,7 @@ from typing import List, Dict, Any
 class ExcelReportGenerator:
 
     @staticmethod
-    def _aplicar_estilos_base(ws, titulo: str, subtitulo: str):
+    def _aplicar_estilos_base(ws, titulo: str, subtitulo: str, criterios: str = ""):
         # Encabezado institucional
         ws.merge_cells("A1:H1")
         cell_title = ws["A1"]
@@ -26,6 +26,14 @@ class ExcelReportGenerator:
         cell_sub.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[2].height = 20
 
+        if criterios:
+            ws.merge_cells("A3:H3")
+            cell_crit = ws["A3"]
+            cell_crit.value = f"Filtros aplicados: {criterios}"
+            cell_crit.font = Font(name="Calibri", size=10, bold=True, color="B45309")
+            cell_crit.alignment = Alignment(horizontal="center", vertical="center")
+            ws.row_dimensions[3].height = 20
+
     @staticmethod
     def _autoajustar_columnas(ws):
         for col in ws.columns:
@@ -33,13 +41,13 @@ class ExcelReportGenerator:
             col_letter = get_column_letter(col[0].column)
             for cell in col:
                 val = str(cell.value or "")
-                if len(val) > max_len and cell.row > 2:
+                if len(val) > max_len and cell.row > 3:
                     max_len = len(val)
             ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
 
     # ---------------- REPORTE 3: BITÁCORA HISTÓRICA Y COSTOS ----------------
     @staticmethod
-    def generar_reporte_historial_costos(historial: List[Dict[str, Any]], ruta_destino: str):
+    def generar_reporte_historial_costos(historial: List[Dict[str, Any]], ruta_destino: str, criterios: str = ""):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Historial y Costos"
@@ -48,7 +56,8 @@ class ExcelReportGenerator:
         ExcelReportGenerator._aplicar_estilos_base(
             ws,
             "Bitácora Histórica de Mantenimiento y Costos",
-            "Relación de servicios mecánicos ejecutados y gastos asociados"
+            "Relación de servicios mecánicos ejecutados y gastos asociados",
+            criterios
         )
 
         headers = ["ID", "Fecha", "Unidad", "Placa", "Rutina Ejecutada", "Odómetro al Servicio", "Taller / Mecánico", "Costo ($)", "Detalle del Trabajo"]
@@ -123,7 +132,7 @@ class ExcelReportGenerator:
 
     # ---------------- REPORTE 5: RESUMEN EJECUTIVO Y MÉTRICAS ----------------
     @staticmethod
-    def generar_reporte_metricas_talleres(historial: List[Dict[str, Any]], vehiculos: List[Dict[str, Any]], ruta_destino: str):
+    def generar_reporte_metricas_talleres(historial: List[Dict[str, Any]], vehiculos: List[Dict[str, Any]], ruta_destino: str, criterios: str = ""):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Métricas Ejecutivas"
@@ -132,7 +141,8 @@ class ExcelReportGenerator:
         ExcelReportGenerator._aplicar_estilos_base(
             ws,
             "Resumen Ejecutivo de Talleres y Desempeño Operativo",
-            "Métricas consolidadas de costos por proveedor y tipos de mantenimiento"
+            "Métricas consolidadas de costos por proveedor y tipos de mantenimiento",
+            criterios
         )
 
         font_header = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
@@ -166,6 +176,9 @@ class ExcelReportGenerator:
             talleres_data[taller]["total"] += costo
 
         curr_row = 6
+        if not historial:
+            ws.cell(row=curr_row, column=1, value="No se encontraron registros con los filtros seleccionados.").font = Font(italic=True, color="6B7280")
+            curr_row += 1
         for t_nom, t_info in sorted(talleres_data.items(), key=lambda x: x[1]["total"], reverse=True):
             ws.cell(row=curr_row, column=1, value=t_nom).alignment = Alignment(horizontal="left")
             c_cnt = ws.cell(row=curr_row, column=2, value=t_info["count"])

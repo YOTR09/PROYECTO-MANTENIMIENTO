@@ -108,7 +108,7 @@ def init_db():
         _migrar_columnas_activo(conn)
         _migrar_columnas_seguridad(conn)
 
-        # Verificar e insertar semillas si faltan roles, usuarios o mantenimientos
+        # Verificar e insertar semillas si faltan roles, usuarios, tipos, socios o vehículos
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM rol")
         count_roles = cursor.fetchone()[0]
@@ -116,7 +116,16 @@ def init_db():
         cursor.execute("SELECT COUNT(*) FROM tipo_mantenimiento")
         count_tipos = cursor.fetchone()[0]
 
-        if (count_roles == 0 or count_tipos == 0) and os.path.exists(SEEDS_PATH):
+        necesita_semillas = (count_roles == 0 or count_tipos == 0)
+        if not is_testing_env():
+            cursor.execute("SELECT COUNT(*) FROM socio")
+            count_socios = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM vehiculo")
+            count_vehiculos = cursor.fetchone()[0]
+            if count_socios == 0 or count_vehiculos == 0:
+                necesita_semillas = True
+
+        if necesita_semillas and os.path.exists(SEEDS_PATH):
             with open(SEEDS_PATH, "r", encoding="utf-8") as f:
                 conn.executescript(f.read())
         conn.commit()

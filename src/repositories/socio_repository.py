@@ -2,7 +2,7 @@ from config.database import get_db_cursor
 
 class SocioRepository:
     @staticmethod
-    def get_all(search_term=None, solo_activos=True):
+    def get_all(search_term=None, solo_activos=True, estado_filter=None, id_socio=None, con_unidades=None):
         with get_db_cursor() as cursor:
             query = """
                 SELECT id_socio, cedula, nombre_completo, telefono, estado, activo 
@@ -17,6 +17,19 @@ class SocioRepository:
                 query += " AND (cedula LIKE ? OR nombre_completo LIKE ? OR telefono LIKE ?)"
                 wildcard = f"%{search_term.strip()}%"
                 params.extend([wildcard, wildcard, wildcard])
+
+            if estado_filter and estado_filter != "Todos":
+                query += " AND estado = ?"
+                params.append(estado_filter)
+
+            if id_socio:
+                query += " AND id_socio = ?"
+                params.append(id_socio)
+
+            if con_unidades is True:
+                query += " AND EXISTS (SELECT 1 FROM vehiculo v WHERE v.id_socio = socio.id_socio AND v.activo = 1)"
+            elif con_unidades is False:
+                query += " AND NOT EXISTS (SELECT 1 FROM vehiculo v WHERE v.id_socio = socio.id_socio AND v.activo = 1)"
 
             query += " ORDER BY nombre_completo ASC"
             cursor.execute(query, params)

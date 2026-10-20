@@ -16,7 +16,7 @@ def _safe_str(val: Any) -> str:
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo_empresa_light.png")
 
-def _crear_encabezado_pdf(elementos, titulo_reporte: str, subtitulo: str = ""):
+def _crear_encabezado_pdf(elementos, titulo_reporte: str, subtitulo: str = "", criterios: str = ""):
     styles = getSampleStyleSheet()
     
     header_data = []
@@ -55,6 +55,8 @@ def _crear_encabezado_pdf(elementos, titulo_reporte: str, subtitulo: str = ""):
 
     ahora_str = datetime.now().strftime("%d/%m/%Y %H:%M")
     texto_centro = f"<b>{_safe_str(titulo_reporte)}</b><br/><font size=8>{_safe_str(subtitulo)}</font>"
+    if criterios:
+        texto_centro += f"<br/><font size=7 color='#B45309'><b>Filtros aplicados:</b> {_safe_str(criterios)}</font>"
     texto_derecha = f"<b>Empresa:</b> Brisas del Palmar<br/><b>Emisión:</b> {ahora_str}<br/><b>Sistema:</b> Control de Flota"
 
     col1 = logo_img if logo_img else Paragraph("<b>BRISAS DEL PALMAR</b>", style_title)
@@ -70,11 +72,27 @@ def _crear_encabezado_pdf(elementos, titulo_reporte: str, subtitulo: str = ""):
     elementos.append(header_table)
     elementos.append(Spacer(1, 15))
 
+def _agregar_tabla(elementos, tabla, hay_datos: bool):
+    """Agrega la tabla o, si no hay registros, un mensaje informativo."""
+    if hay_datos:
+        elementos.append(tabla)
+    else:
+        estilo = ParagraphStyle(
+            "SinDatos",
+            parent=getSampleStyleSheet()["Normal"],
+            fontSize=11,
+            alignment=1,
+            textColor=colors.HexColor("#6B7280"),
+            spaceBefore=30,
+            spaceAfter=30,
+        )
+        elementos.append(Paragraph("No se encontraron registros con los filtros seleccionados.", estilo))
+
 class PDFReportGenerator:
 
     # ---------------- REPORTE 1: FICHA TÉCNICA DE FLOTA ----------------
     @staticmethod
-    def generar_reporte_flota(vehiculos: List[Dict[str, Any]], ruta_destino: str):
+    def generar_reporte_flota(vehiculos: List[Dict[str, Any]], ruta_destino: str, criterios: str = ""):
         doc = SimpleDocTemplate(
             ruta_destino,
             pagesize=landscape(letter),
@@ -87,7 +105,8 @@ class PDFReportGenerator:
         _crear_encabezado_pdf(
             elementos,
             "FICHA TÉCNICA Y ESTADO DE FLOTA VEHICULAR",
-            "Relación oficial de unidades de transporte público activas y asignadas"
+            "Relación oficial de unidades de transporte público activas y asignadas",
+            criterios
         )
 
         headers = ["Unidad", "Placa", "Marca y Modelo", "Año", "Odómetro Actual", "Socio Propietario", "Cédula", "Estado"]
@@ -137,7 +156,7 @@ class PDFReportGenerator:
                 style.add('TEXTCOLOR', (7, i), (7, i), colors.HexColor("#16A34A"))
 
         tabla.setStyle(style)
-        elementos.append(tabla)
+        _agregar_tabla(elementos, tabla, len(data) > 1)
 
         # Resumen al pie
         elementos.append(Spacer(1, 15))
@@ -149,7 +168,7 @@ class PDFReportGenerator:
 
     # ---------------- REPORTE 2: PLAN PREVENTIVO Y ALERTAS ----------------
     @staticmethod
-    def generar_reporte_preventivo(programaciones: List[Dict[str, Any]], ruta_destino: str):
+    def generar_reporte_preventivo(programaciones: List[Dict[str, Any]], ruta_destino: str, criterios: str = ""):
         doc = SimpleDocTemplate(
             ruta_destino,
             pagesize=landscape(letter),
@@ -162,7 +181,8 @@ class PDFReportGenerator:
         _crear_encabezado_pdf(
             elementos,
             "PLAN DE MANTENIMIENTO PREVENTIVO Y SEMAFORIZACIÓN",
-            "Control y proyección de vencimientos por kilometraje y fecha límite"
+            "Control y proyección de vencimientos por kilometraje y fecha límite",
+            criterios
         )
 
         headers = ["Unidad", "Placa", "Rutina de Mantenimiento", "Odómetro Actual", "Próx. Servicio Km", "Próx. Fecha", "Diagnóstico / Alerta", "Semáforo"]
@@ -219,7 +239,7 @@ class PDFReportGenerator:
                 style.add('TEXTCOLOR', (7, i), (7, i), colors.HexColor("#166534"))
 
         tabla.setStyle(style)
-        elementos.append(tabla)
+        _agregar_tabla(elementos, tabla, len(data) > 1)
 
         elementos.append(Spacer(1, 15))
         styles = getSampleStyleSheet()
@@ -233,7 +253,7 @@ class PDFReportGenerator:
 
     # ---------------- REPORTE 4: DIRECTORIO DE SOCIOS ----------------
     @staticmethod
-    def generar_reporte_socios(socios_con_unidades: List[Dict[str, Any]], ruta_destino: str):
+    def generar_reporte_socios(socios_con_unidades: List[Dict[str, Any]], ruta_destino: str, criterios: str = ""):
         doc = SimpleDocTemplate(
             ruta_destino,
             pagesize=letter,
@@ -246,7 +266,8 @@ class PDFReportGenerator:
         _crear_encabezado_pdf(
             elementos,
             "DIRECTORIO INSTITUCIONAL DE SOCIOS PROPIETARIOS",
-            "Registro de afiliados y distribución de unidades operativas"
+            "Registro de afiliados y distribución de unidades operativas",
+            criterios
         )
 
         headers = ["Cédula / RIF", "Nombre Completo", "Teléfono", "Estado", "Unidades Asignadas"]
@@ -283,7 +304,7 @@ class PDFReportGenerator:
             style.add('BACKGROUND', (0, i), (-1, i), bg)
 
         tabla.setStyle(style)
-        elementos.append(tabla)
+        _agregar_tabla(elementos, tabla, len(data) > 1)
 
         elementos.append(Spacer(1, 15))
         styles = getSampleStyleSheet()
