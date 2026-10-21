@@ -56,7 +56,29 @@ python3 main.py
 ```bash
 python3 -m unittest discover tests -v
 ```
-La suite incluye 21 pruebas (3 + 8 + 10) y requiere las dependencias de `requirements.txt` instaladas.
+La suite incluye pruebas integrales y requiere las dependencias de `requirements.txt` instaladas.
+
+---
+
+## 📦 Generación de Ejecutables Portables (Linux y Windows)
+
+La aplicación está preparada para compilarse como un **único archivo ejecutable portable (`--onefile`)** mediante **PyInstaller** (`BrisasDelPalmar.spec`). Los recursos gráficos (`assets/`) y esquemas SQL (`database/*.sql`) quedan embebidos en el ejecutable, mientras que la base de datos SQLite (`data/mantenimiento.db`) se crea automáticamente junto al ejecutable.
+
+### 🐧 Compilar en Linux (`dist/BrisasDelPalmar`)
+```bash
+bash scripts/build_linux.sh
+# Ejecutar el binario generado:
+./dist/BrisasDelPalmar
+```
+
+### 🪟 Compilar en Windows (`dist\BrisasDelPalmar.exe`)
+Desde una consola CMD o PowerShell en Windows:
+```bat
+scripts\build_windows.bat
+```
+
+### ☁️ Compilación Automática en la Nube (GitHub Actions)
+El repositorio incluye el workflow [`.github/workflows/build_executables.yml`](.github/workflows/build_executables.yml) que compila automáticamente tanto el ejecutable de **Linux (`BrisasDelPalmar`)** como el de **Windows (`BrisasDelPalmar.exe`)** en cada `push` a `main` o desde la pestaña **Actions** en GitHub, dejando ambos listos para descargar en la sección *Artifacts*.
 
 ---
 

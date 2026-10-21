@@ -6,6 +6,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from typing import List, Dict, Any
+from config.paths import get_asset_path
 
 def _safe_str(val: Any) -> str:
     """Escapa caracteres especiales XML/HTML para inserción segura en Paragraphs."""
@@ -13,8 +14,7 @@ def _safe_str(val: Any) -> str:
         return ""
     return html.escape(str(val))
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo_empresa_light.png")
+LOGO_PATH = get_asset_path("logo_empresa_light.png")
 
 def _crear_encabezado_pdf(elementos, titulo_reporte: str, subtitulo: str = "", criterios: str = ""):
     styles = getSampleStyleSheet()

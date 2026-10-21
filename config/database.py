@@ -1,8 +1,10 @@
 import sqlite3
 import os
 from contextlib import contextmanager
+from config.paths import get_app_dir, get_resource_dir
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = get_app_dir()
+RESOURCE_DIR = get_resource_dir()
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "mantenimiento.db")
 
@@ -14,8 +16,8 @@ def get_current_db_path():
         return os.path.join(DATA_DIR, "test_mantenimiento.db")
     return DB_PATH
 
-SCHEMA_PATH = os.path.join(BASE_DIR, "database", "schema.sql")
-SEEDS_PATH = os.path.join(BASE_DIR, "database", "seeds.sql")
+SCHEMA_PATH = os.path.join(RESOURCE_DIR, "database", "schema.sql")
+SEEDS_PATH = os.path.join(RESOURCE_DIR, "database", "seeds.sql")
 
 def ensure_data_dir():
     """Asegura que el directorio data exista"""

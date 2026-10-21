@@ -1,6 +1,8 @@
 import os
-from PIL import Image
+import sys
+from PIL import Image, ImageTk
 import customtkinter as ctk
+from config.paths import get_asset_path
 from src.views.login_view import LoginView
 from src.views.dashboard_view import DashboardView
 from src.views.vehiculos_view import VehiculosView
@@ -21,9 +23,10 @@ from src.views.theme import (
     configurar_estilos_treeview,
 )
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-LOGO_DARK_PATH = os.path.join(BASE_DIR, "assets", "logo_empresa_dark.png")
-LOGO_LIGHT_PATH = os.path.join(BASE_DIR, "assets", "logo_empresa_light.png")
+LOGO_DARK_PATH = get_asset_path("logo_empresa_dark.png")
+LOGO_LIGHT_PATH = get_asset_path("logo_empresa_light.png")
+ICON_PNG_PATH = get_asset_path("icono_empresa.png")
+ICON_ICO_PATH = get_asset_path("icono_empresa.ico")
 
 class MainWindow(ctk.CTk):
     def __init__(self):
@@ -32,6 +35,7 @@ class MainWindow(ctk.CTk):
         self.title("Brisas del Palmar - Control de Flota y Mantenimiento Preventivo")
         self.geometry("520x620")
         self.minsize(460, 520)
+        self._configurar_icono_ventana()
 
         # Configuración de tema visual
         ctk.set_appearance_mode("Dark")
@@ -46,6 +50,18 @@ class MainWindow(ctk.CTk):
         self.container = None
 
         self._mostrar_pantalla_login()
+
+    def _configurar_icono_ventana(self):
+        """Configura el icono de la ventana principal en Windows (.ico) y Linux/macOS (.png)."""
+        try:
+            if sys.platform.startswith("win") and os.path.exists(ICON_ICO_PATH):
+                self.iconbitmap(ICON_ICO_PATH)
+            if os.path.exists(ICON_PNG_PATH):
+                img_icon = Image.open(ICON_PNG_PATH)
+                self._icon_photo = ImageTk.PhotoImage(img_icon)
+                self.wm_iconphoto(True, self._icon_photo)
+        except Exception:
+            pass
 
     def _mostrar_pantalla_login(self):
         # Limpiar componentes previos si viene de logout

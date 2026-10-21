@@ -1,11 +1,11 @@
 import os
 from PIL import Image
 import customtkinter as ctk
+from config.paths import get_asset_path
 from src.controllers.auth_controller import AuthController
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-LOGO_DARK_PATH = os.path.join(BASE_DIR, "assets", "logo_empresa_dark.png")
-LOGO_LIGHT_PATH = os.path.join(BASE_DIR, "assets", "logo_empresa_light.png")
+LOGO_DARK_PATH = get_asset_path("logo_empresa_dark.png")
+LOGO_LIGHT_PATH = get_asset_path("logo_empresa_light.png")
 
 class LoginView(ctk.CTkFrame):
     def __init__(self, parent, on_success):

@@ -4,4 +4,7 @@ __pycache__/
 venv/
 .env
 data/*.db
+build/
+dist/
+
 
